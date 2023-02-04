@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TransactionHelpers.Exceptions;
 
 /// <summary>
-/// Exception for responses with no results and no error.
+/// Exception for responses with no result and no error.
 /// </summary>
 public class EmptyResultException : Exception
 {
