@@ -1,5 +1,6 @@
 [
   {
+    "enable": true,
     "id": "TransactionHelpers_nuget",
     "name": "TransactionHelpers NuGet",
     "project_dir": "TransactionHelpers",

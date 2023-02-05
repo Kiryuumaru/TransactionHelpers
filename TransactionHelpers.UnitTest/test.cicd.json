@@ -1,5 +1,6 @@
 [
   {
+    "enable": true,
     "id": "transactionHelpers_nuget_test",
     "name": "TransactionHelpers Test",
     "project_dir": "TransactionHelpers.UnitTest",
