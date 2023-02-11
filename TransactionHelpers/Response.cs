@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using TransactionHelpers.Exceptions;
 using TransactionHelpers.Interface;
 
@@ -104,9 +105,21 @@ public class Response<TResult> : IResponse
         if (responses.LastOrDefault() is IResponse lastResponse)
         {
             Error = lastResponse.Error;
-            if (lastResponse is Response<TResult> lastTypedResponse)
+            if (lastResponse.GetType().GetProperty(nameof(Result)) is PropertyInfo propertyInfo)
             {
-                Result = lastTypedResponse.Result;
+                Type resultType = typeof(TResult);
+                if (resultType.IsAssignableFrom(propertyInfo.PropertyType))
+                {
+                    object? result = propertyInfo.GetValue(lastResponse);
+                    if (result is TResult typedResult)
+                    {
+                        Result = typedResult;
+                    }
+                    else if (result == null)
+                    {
+                        Result = default;
+                    }
+                }
             }
         }
     }
