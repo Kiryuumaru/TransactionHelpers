@@ -104,7 +104,10 @@ public class Response<TResult> : IResponse
     {
         if (responses.LastOrDefault() is IResponse lastResponse)
         {
-            Error = lastResponse.Error;
+            if (lastResponse.Error is not EmptyResultException)
+            {
+                Error = lastResponse.Error;
+            }
             if (lastResponse.GetType().GetProperty(nameof(Result)) is PropertyInfo propertyInfo)
             {
                 Type resultType = typeof(TResult);
@@ -130,6 +133,10 @@ public class Response<TResult> : IResponse
     /// <param name="error">The exception to append.</param>
     public virtual void Append(Exception? error)
     {
+        if (error != null)
+        {
+            Result = default;
+        }
         Error = error;
     }
 
@@ -139,6 +146,10 @@ public class Response<TResult> : IResponse
     /// <param name="result">The result to append.</param>
     public virtual void Append(TResult? result)
     {
+        if (result != null)
+        {
+            Error = default;
+        }
         Result = result;
     }
 }
