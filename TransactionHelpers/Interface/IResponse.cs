@@ -9,9 +9,9 @@ namespace TransactionHelpers.Interface;
 public interface IResponse
 {
     /// <summary>
-    /// Gets the exception of the operation.
+    /// Gets the <see cref="TransactionHelpers.Error"/> of the operation.
     /// </summary>
-    public Exception? Error { get; }
+    public Error? Error { get; }
 
     /// <summary>
     /// Gets <c>true</c> whether the operation is successful; otherwise, <c>false</c>.

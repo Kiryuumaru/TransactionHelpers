@@ -1,2 +1,2 @@
-0.1.5
-* Bump dependency version
+0.1.6
+* Added custom error type

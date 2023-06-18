@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using TransactionHelpers.Exceptions;
 using TransactionHelpers.Interface;
 
@@ -13,7 +14,7 @@ namespace TransactionHelpers;
 public class Response : IResponse
 {
     /// <inheritdoc/>
-    public virtual Exception? Error { get; protected set; }
+    public virtual Error? Error { get; protected set; }
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
@@ -34,8 +35,9 @@ public class Response : IResponse
     /// <summary>
     /// Creates an instance of <see cref="Response"/>
     /// </summary>
-    /// <param name="error">The exception to append.</param>
-    public Response(Exception? error)
+    /// <param name="error">The error of the response.</param>
+    [JsonConstructor]
+    public Response(Error? error)
     {
         Error = error;
     }
@@ -45,7 +47,7 @@ public class Response : IResponse
     {
         if (Error != null)
         {
-            throw Error;
+            throw Error.Exception ?? new Exception(Error.Message);
         }
     }
 
@@ -62,12 +64,21 @@ public class Response : IResponse
     }
 
     /// <summary>
-    /// Append an exception to the response.
+    /// Append an error to the response.
     /// </summary>
-    /// <param name="error">The exception to append.</param>
-    public virtual void Append(Exception? error)
+    /// <param name="error">The error to append.</param>
+    public virtual void Append(Error? error)
     {
         Error = error;
+    }
+
+    /// <summary>
+    /// Append an exception to the response.
+    /// </summary>
+    /// <param name="exception">The exception to append.</param>
+    public virtual void Append(Exception? exception)
+    {
+        Append(new Error(exception));
     }
 }
 
@@ -79,7 +90,7 @@ public class Response : IResponse
 /// </typeparam>
 public class Response<TResult> : IResponse
 {
-    private Exception? error;
+    private Error? error;
 
     /// <summary>
     /// Gets the <typeparamref name="TResult"/> of the operation.
@@ -87,9 +98,9 @@ public class Response<TResult> : IResponse
     public virtual TResult? Result { get; protected set; }
 
     /// <inheritdoc/>
-    public Exception? Error
+    public Error? Error
     {
-        get => error == null && Result == null ? new EmptyResultException() : error;
+        get => error == null && Result == null ? new Error(new EmptyResultException()) : error;
         set => error = value;
     }
 
@@ -123,8 +134,8 @@ public class Response<TResult> : IResponse
     /// <summary>
     /// Creates an instance of <see cref="Response{TResult}"/>
     /// </summary>
-    /// <param name="error">The exception to append.</param>
-    public Response(Exception? error)
+    /// <param name="error">The error of the response.</param>
+    public Response(Error? error)
     {
         Error = error;
     }
@@ -132,9 +143,10 @@ public class Response<TResult> : IResponse
     /// <summary>
     /// Creates an instance of <see cref="Response{TResult}"/>
     /// </summary>
-    /// <param name="result">The result to append.</param>
-    /// <param name="error">The exception to append.</param>
-    public Response(TResult? result, Exception? error)
+    /// <param name="result">The result of the response.</param>
+    /// <param name="error">The error of the response.</param>
+    [JsonConstructor]
+    public Response(TResult? result, Error? error)
     {
         Result = result;
         Error = error;
@@ -146,7 +158,7 @@ public class Response<TResult> : IResponse
     {
         if (IsError)
         {
-            throw Error;
+            throw Error.Exception ?? new Exception(Error.Message);
         }
     }
 
@@ -158,7 +170,7 @@ public class Response<TResult> : IResponse
     {
         if (responses.LastOrDefault() is IResponse lastResponse)
         {
-            if (lastResponse.Error is not EmptyResultException)
+            if (lastResponse.Error?.Exception is not EmptyResultException)
             {
                 Error = lastResponse.Error;
             }
@@ -182,16 +194,25 @@ public class Response<TResult> : IResponse
     }
 
     /// <summary>
-    /// Append an exception to the response.
+    /// Append an error to the response.
     /// </summary>
-    /// <param name="error">The exception to append.</param>
-    public virtual void Append(Exception? error)
+    /// <param name="error">The error to append.</param>
+    public virtual void Append(Error? error)
     {
         if (error != null)
         {
             Result = default;
         }
         Error = error;
+    }
+
+    /// <summary>
+    /// Append an exception to the response.
+    /// </summary>
+    /// <param name="exception">The exception to append.</param>
+    public virtual void Append(Exception? exception)
+    {
+        Append(new Error(exception));
     }
 
     /// <summary>
