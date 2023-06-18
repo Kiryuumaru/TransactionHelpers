@@ -13,6 +13,7 @@ public class Error
     /// <summary>
     /// Gets the <see cref="System.Exception"/> of the error.
     /// </summary>
+    [JsonIgnore]
     public Exception? Exception { get; protected set; }
 
     /// <summary>
