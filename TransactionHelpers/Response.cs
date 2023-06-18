@@ -23,6 +23,23 @@ public class Response : IResponse
     [MemberNotNullWhen(true, nameof(Error))]
     public virtual bool IsError { get => Error != null; }
 
+    /// <summary>
+    /// Creates an instance of <see cref="Response"/>
+    /// </summary>
+    public Response()
+    {
+
+    }
+
+    /// <summary>
+    /// Creates an instance of <see cref="Response"/>
+    /// </summary>
+    /// <param name="error">The exception to append.</param>
+    public Response(Exception? error)
+    {
+        Error = error;
+    }
+
     /// <inheritdoc/>
     public virtual void ThrowIfError()
     {
@@ -85,6 +102,43 @@ public class Response<TResult> : IResponse
     [MemberNotNullWhen(true, nameof(Error))]
     [MemberNotNullWhen(false, nameof(Result))]
     public virtual bool IsError { get => error != null || Result == null; }
+
+    /// <summary>
+    /// Creates an instance of <see cref="Response{TResult}"/>
+    /// </summary>
+    public Response()
+    {
+
+    }
+
+    /// <summary>
+    /// Creates an instance of <see cref="Response{TResult}"/>
+    /// </summary>
+    /// <param name="result">The result to append.</param>
+    public Response(TResult? result)
+    {
+        Result = result;
+    }
+
+    /// <summary>
+    /// Creates an instance of <see cref="Response{TResult}"/>
+    /// </summary>
+    /// <param name="error">The exception to append.</param>
+    public Response(Exception? error)
+    {
+        Error = error;
+    }
+
+    /// <summary>
+    /// Creates an instance of <see cref="Response{TResult}"/>
+    /// </summary>
+    /// <param name="result">The result to append.</param>
+    /// <param name="error">The exception to append.</param>
+    public Response(TResult? result, Exception? error)
+    {
+        Result = result;
+        Error = error;
+    }
 
     /// <inheritdoc/>
     [MemberNotNull(nameof(Result))]

@@ -1,2 +1,2 @@
-0.1.4
-* Fixed some bugs
+0.1.5
+* Bump dependency version
