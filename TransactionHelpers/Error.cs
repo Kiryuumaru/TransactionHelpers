@@ -46,6 +46,7 @@ public class Error
     /// Creates an instance of <see cref="Error"/>.
     /// </summary>
     /// <param name="message">The message of the error.</param>
+    [JsonConstructor]
     public Error(string? message)
     {
         Message = message;
@@ -56,7 +57,6 @@ public class Error
     /// </summary>
     /// <param name="exception">The <see cref="System.Exception"/> of the error.</param>
     /// <param name="message">The message of the error.</param>
-    [JsonConstructor]
     public Error(Exception? exception, string? message)
     {
         Exception = exception;
