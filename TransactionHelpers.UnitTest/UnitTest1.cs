@@ -13,7 +13,11 @@ namespace TransactionHelpers.UnitTest
             Assert.False(response1.IsError);
             Assert.Null(response1.Error);
 
-            response1 = response1.Append(new Exception());
+            response1 = new()
+            {
+                AppendResponse = response1,
+                AppendException = new Exception()
+            };
 
             Assert.False(response1.IsSuccess);
             Assert.True(response1.IsError);
@@ -22,7 +26,10 @@ namespace TransactionHelpers.UnitTest
 
             Response response2 = new();
 
-            response2 = response2.Append(response1);
+            response2 = new()
+            {
+                AppendResponse = response1
+            };
 
             Assert.False(response2.IsSuccess);
             Assert.True(response2.IsError);
@@ -39,7 +46,11 @@ namespace TransactionHelpers.UnitTest
             Assert.NotNull(response1.Error);
             Assert.Throws<EmptyResultException>(response1.ThrowIfError);
 
-            response1 = response1.Append("test");
+            response1 = new()
+            {
+                AppendResponse = response1,
+                Result = "test"
+            };
 
             Assert.True(response1.IsSuccess);
             Assert.False(response1.IsError);
@@ -47,7 +58,10 @@ namespace TransactionHelpers.UnitTest
 
             Response<string> response2 = new();
 
-            response2 = response2.Append(response1);
+            response2 = new()
+            {
+                AppendResponse = response1,
+            };
 
             Assert.True(response2.IsSuccess);
             Assert.False(response2.IsError);
