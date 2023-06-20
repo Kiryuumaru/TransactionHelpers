@@ -13,8 +13,24 @@ namespace TransactionHelpers;
 /// </summary>
 public class Response : IResponse
 {
+    private Error? error;
+
     /// <inheritdoc/>
-    public virtual Error? Error { get; init; }
+    public virtual Error? Error
+    {
+        get => error;
+        set
+        {
+            if (value == null || value.Exception == null || string.IsNullOrEmpty(value.Message))
+            {
+                error = null;
+            }
+            else
+            {
+                error = value;
+            }
+        }
+    }
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
@@ -23,14 +39,6 @@ public class Response : IResponse
     /// <inheritdoc/>
     [MemberNotNullWhen(true, nameof(Error))]
     public virtual bool IsError { get => Error != null; }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Response"/>
-    /// </summary>
-    public Response()
-    {
-
-    }
 
     /// <inheritdoc/>
     public virtual void ThrowIfError()
@@ -78,10 +86,10 @@ public class Response : IResponse
     /// <returns>The resulting <see cref="Response"/> after the append.</returns>
     public virtual Response Append(Exception? exception)
     {
-        return Append(new Error()
+        return new()
         {
-            Exception = exception
-        });
+            Error = new Error() { Exception = exception }
+        };
     }
 }
 
@@ -130,11 +138,15 @@ public class Response<TResult> : IResponse
         }
         init
         {
-            if (value != null)
+            if (value == null || value.Exception == null || string.IsNullOrEmpty(value.Message))
+            {
+                error = null;
+            }
+            else
             {
                 Result = default;
+                error = value;
             }
-            error = value;
         }
     }
 
@@ -147,14 +159,6 @@ public class Response<TResult> : IResponse
     [MemberNotNullWhen(true, nameof(Error))]
     [MemberNotNullWhen(false, nameof(Result))]
     public virtual bool IsError { get => error != null || Result == null; }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Response{TResult}"/>
-    /// </summary>
-    public Response()
-    {
-
-    }
 
     /// <inheritdoc/>
     [MemberNotNull(nameof(Result))]
@@ -199,8 +203,8 @@ public class Response<TResult> : IResponse
             }
             return new()
             {
+                Result = result,
                 Error = error,
-                Result = result
             };
         }
         return this;
@@ -215,8 +219,8 @@ public class Response<TResult> : IResponse
     {
         return new()
         {
+            Result = result,
             Error = error,
-            Result = result
         };
     }
 
