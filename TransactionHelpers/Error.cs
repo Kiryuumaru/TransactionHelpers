@@ -10,63 +10,45 @@ namespace TransactionHelpers;
 /// </summary>
 public class Error
 {
+    private Exception? exception;
+    private Exception? messageException;
+
     /// <summary>
     /// Gets the <see cref="System.Exception"/> of the error.
     /// </summary>
     [JsonIgnore]
-    public Exception? Exception { get; protected set; }
+    public Exception? Exception
+    {
+        get
+        {
+            if (exception == null && messageException != null)
+            {
+                return messageException;
+            }
+            return exception;
+        }
+        init
+        {
+            exception = value;
+        }
+    }
 
     /// <summary>
     /// Gets the message of the error.
     /// </summary>
-    public string? Message { get; protected set; }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Error"/>.
-    /// </summary>
-    public Error()
+    public string? Message
     {
-
-    }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Error"/>.
-    /// </summary>
-    /// <param name="exception">The <see cref="System.Exception"/> of the error.</param>
-    public Error(Exception? exception)
-    {
-        Exception = exception;
-        if (exception != null)
+        get
         {
-            Message = exception.Message;
+            if (exception != null && messageException == null)
+            {
+                return exception.Message;
+            }
+            return messageException?.Message;
         }
-    }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Error"/>.
-    /// </summary>
-    /// <param name="message">The message of the error.</param>
-    [JsonConstructor]
-    public Error(string? message)
-    {
-        Message = message;
-    }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Error"/>.
-    /// </summary>
-    /// <param name="exception">The <see cref="System.Exception"/> of the error.</param>
-    /// <param name="message">The message of the error.</param>
-    public Error(Exception? exception, string? message)
-    {
-        Exception = exception;
-        if (string.IsNullOrEmpty(message) && exception != null)
+        init
         {
-            Message = exception.Message;
-        }
-        else
-        {
-            Message = message;
+            messageException = new Exception(value);
         }
     }
 }

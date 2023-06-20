@@ -14,7 +14,7 @@ namespace TransactionHelpers;
 public class Response : IResponse
 {
     /// <inheritdoc/>
-    public virtual Error? Error { get; protected set; }
+    public virtual Error? Error { get; init; }
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
@@ -32,16 +32,6 @@ public class Response : IResponse
 
     }
 
-    /// <summary>
-    /// Creates an instance of <see cref="Response"/>
-    /// </summary>
-    /// <param name="error">The error of the response.</param>
-    [JsonConstructor]
-    public Response(Error? error)
-    {
-        Error = error;
-    }
-
     /// <inheritdoc/>
     public virtual void ThrowIfError()
     {
@@ -55,30 +45,43 @@ public class Response : IResponse
     /// Append <see cref="IResponse"/> to the response.
     /// </summary>
     /// <param name="responses">The responses <see cref="IResponse"/> to append.</param>
-    public virtual void Append(params IResponse[] responses)
+    /// <returns>The resulting <see cref="Response"/> after the append.</returns>
+    public virtual Response Append(params IResponse[] responses)
     {
         if (responses.LastOrDefault() is IResponse lastResponse)
         {
-            Error = lastResponse.Error;
+            return new()
+            {
+                Error = lastResponse.Error
+            };
         }
+        return this;
     }
 
     /// <summary>
     /// Append an error to the response.
     /// </summary>
     /// <param name="error">The error to append.</param>
-    public virtual void Append(Error? error)
+    /// <returns>The resulting <see cref="Response"/> after the append.</returns>
+    public virtual Response Append(Error? error)
     {
-        Error = error;
+        return new()
+        {
+            Error = error
+        };
     }
 
     /// <summary>
     /// Append an exception to the response.
     /// </summary>
     /// <param name="exception">The exception to append.</param>
-    public virtual void Append(Exception? exception)
+    /// <returns>The resulting <see cref="Response"/> after the append.</returns>
+    public virtual Response Append(Exception? exception)
     {
-        Append(new Error(exception));
+        return Append(new Error()
+        {
+            Exception = exception
+        });
     }
 }
 
@@ -90,18 +93,49 @@ public class Response : IResponse
 /// </typeparam>
 public class Response<TResult> : IResponse
 {
+    private static readonly Error EmptyResultError = new()
+    {
+        Exception = new EmptyResultException()
+    };
+
+    private TResult? result;
     private Error? error;
 
     /// <summary>
     /// Gets the <typeparamref name="TResult"/> of the operation.
     /// </summary>
-    public virtual TResult? Result { get; protected set; }
+    public virtual TResult? Result
+    {
+        get => result;
+        init
+        {
+            if (value != null)
+            {
+                Error = default;
+            }
+            result = value;
+        }
+    }
 
     /// <inheritdoc/>
     public Error? Error
     {
-        get => error == null && Result == null ? new Error(new EmptyResultException()) : error;
-        set => error = value;
+        get
+        {
+            if (error == null && Result == null)
+            {
+                return EmptyResultError;
+            }
+            return error;
+        }
+        init
+        {
+            if (value != null)
+            {
+                Result = default;
+            }
+            error = value;
+        }
     }
 
     /// <inheritdoc/>
@@ -122,36 +156,6 @@ public class Response<TResult> : IResponse
 
     }
 
-    /// <summary>
-    /// Creates an instance of <see cref="Response{TResult}"/>
-    /// </summary>
-    /// <param name="result">The result to append.</param>
-    public Response(TResult? result)
-    {
-        Result = result;
-    }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Response{TResult}"/>
-    /// </summary>
-    /// <param name="error">The error of the response.</param>
-    public Response(Error? error)
-    {
-        Error = error;
-    }
-
-    /// <summary>
-    /// Creates an instance of <see cref="Response{TResult}"/>
-    /// </summary>
-    /// <param name="result">The result of the response.</param>
-    /// <param name="error">The error of the response.</param>
-    [JsonConstructor]
-    public Response(TResult? result, Error? error)
-    {
-        Result = result;
-        Error = error;
-    }
-
     /// <inheritdoc/>
     [MemberNotNull(nameof(Result))]
     public virtual void ThrowIfError()
@@ -166,65 +170,80 @@ public class Response<TResult> : IResponse
     /// Append <see cref="IResponse"/> to the response.
     /// </summary>
     /// <param name="responses">The responses <see cref="IResponse"/> to append.</param>
-    public virtual void Append(params IResponse[] responses)
+    /// <returns>The resulting <see cref="Response{TResult}"/> after the append.</returns>
+    public virtual Response<TResult> Append(params IResponse[] responses)
     {
         if (responses.LastOrDefault() is IResponse lastResponse)
         {
+            Error? error = null;
+            TResult? result = default;
             if (lastResponse.Error?.Exception is not EmptyResultException)
             {
-                Error = lastResponse.Error;
+                error = lastResponse.Error;
             }
             if (lastResponse.GetType().GetProperty(nameof(Result)) is PropertyInfo propertyInfo)
             {
                 Type resultType = typeof(TResult);
                 if (resultType.IsAssignableFrom(propertyInfo.PropertyType))
                 {
-                    object? result = propertyInfo.GetValue(lastResponse);
-                    if (result is TResult typedResult)
+                    object? resultObj = propertyInfo.GetValue(lastResponse);
+                    if (resultObj is TResult typedResult)
                     {
-                        Result = typedResult;
+                        result = typedResult;
                     }
-                    else if (result == null)
+                    else if (resultObj == null)
                     {
-                        Result = default;
+                        result = default;
                     }
                 }
             }
+            return new()
+            {
+                Error = error,
+                Result = result
+            };
         }
+        return this;
     }
 
     /// <summary>
     /// Append an error to the response.
     /// </summary>
     /// <param name="error">The error to append.</param>
-    public virtual void Append(Error? error)
+    /// <returns>The resulting <see cref="Response{TResult}"/> after the append.</returns>
+    public virtual Response<TResult> Append(Error? error)
     {
-        if (error != null)
+        return new()
         {
-            Result = default;
-        }
-        Error = error;
-    }
-
-    /// <summary>
-    /// Append an exception to the response.
-    /// </summary>
-    /// <param name="exception">The exception to append.</param>
-    public virtual void Append(Exception? exception)
-    {
-        Append(new Error(exception));
+            Error = error,
+            Result = result
+        };
     }
 
     /// <summary>
     /// Append <typeparamref name="TResult"/> to the response.
     /// </summary>
     /// <param name="result">The result to append.</param>
-    public virtual void Append(TResult? result)
+    /// <returns>The resulting <see cref="Response{TResult}"/> after the append.</returns>
+    public virtual Response<TResult> Append(TResult? result)
     {
-        if (result != null)
+        return new()
         {
-            Error = default;
-        }
-        Result = result;
+            Error = error,
+            Result = result
+        };
+    }
+
+    /// <summary>
+    /// Append an exception to the response.
+    /// </summary>
+    /// <param name="exception">The exception to append.</param>
+    /// <returns>The resulting <see cref="Response{TResult}"/> after the append.</returns>
+    public virtual Response<TResult> Append(Exception? exception)
+    {
+        return Append(new Error()
+        {
+            Exception = exception
+        });
     }
 }
