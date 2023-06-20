@@ -1,2 +1,2 @@
-1.0.2
-* Improved api callings
+1.0.3
+* Fixed bugs

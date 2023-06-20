@@ -72,9 +72,12 @@ public class Response : IResponse
     {
         init
         {
-            if (value?.LastOrDefault() is IResponse lastResponse)
+            if (value != null)
             {
-                AppendResponse = lastResponse;
+                foreach (var response in value)
+                {
+                    AppendResponse = response;
+                }
             }
         }
     }
@@ -211,9 +214,12 @@ public class Response<TResult> : IResponse
     {
         init
         {
-            if (value?.LastOrDefault() is IResponse lastResponse)
+            if (value != null)
             {
-                AppendResponse = lastResponse;
+                foreach (var response in value)
+                {
+                    AppendResponse = response;
+                }
             }
         }
     }
