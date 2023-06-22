@@ -185,19 +185,21 @@ public class Response<TResult> : IResponse
                 {
                     error = lastResponse.Error;
                 }
-                if (lastResponse.GetType().GetProperty(nameof(Result)) is PropertyInfo propertyInfo)
+                object? objToLook = lastResponse;
+                while (objToLook?.GetType().GetProperty(nameof(Result)) is PropertyInfo propertyInfo)
                 {
-                    Type resultType = typeof(TResult);
-                    if (resultType.IsAssignableFrom(propertyInfo.PropertyType))
+                    objToLook = propertyInfo.GetValue(objToLook);
+                    if (typeof(TResult).IsAssignableFrom(propertyInfo.PropertyType))
                     {
-                        object? resultObj = propertyInfo.GetValue(lastResponse);
-                        if (resultObj is TResult typedResult)
+                        if (objToLook is TResult typedResult)
                         {
                             result = typedResult;
+                            break;
                         }
-                        else if (resultObj == null)
+                        else if (objToLook == null)
                         {
                             result = default;
+                            break;
                         }
                     }
                 }
