@@ -9,9 +9,9 @@ using TransactionHelpers.Exceptions;
 namespace TransactionHelpers;
 
 /// <summary>
-/// The responses for all API request.
+/// The results for all API request.
 /// </summary>
-public class Response : IResponse
+public class Result : IResult
 {
     private Error? error;
 
@@ -52,13 +52,13 @@ public class Response : IResponse
     }
 
     /// <summary>
-    /// Appends the last <see cref="IResponse"/>.
+    /// Appends the last <see cref="IResult"/>.
     /// </summary>
-    public virtual IResponse? AppendResponse
+    public virtual IResult? AppendResponse
     {
         init
         {
-            if (value is IResponse response)
+            if (value is IResult response)
             {
                 Error = response.Error;
             }
@@ -66,9 +66,9 @@ public class Response : IResponse
     }
 
     /// <summary>
-    /// Appends the last <see cref="IResponse"/>.
+    /// Appends the last <see cref="IResult"/>.
     /// </summary>
-    public virtual IResponse?[]? AppendResponses
+    public virtual IResult?[]? AppendResponses
     {
         init
         {
@@ -88,7 +88,7 @@ public class Response : IResponse
     /// <param name="error">
     /// The <see cref="TransactionHelpers.Error"/> to return.
     /// </param>
-    public static implicit operator Response(Error error)
+    public static implicit operator Result(Error error)
     {
         return new() { Error = error };
     }
@@ -99,7 +99,7 @@ public class Response : IResponse
     /// <param name="exception">
     /// The <see cref="Exception"/> to return.
     /// </param>
-    public static implicit operator Response(Exception exception)
+    public static implicit operator Result(Exception exception)
     {
         return new() { AppendException = exception };
     }
@@ -115,62 +115,66 @@ public class Response : IResponse
 }
 
 /// <summary>
-/// The responses for all API request.
+/// The results for all API request.
 /// </summary>
-/// <typeparam name="TResult">
-/// The type of the operation response.
+/// <typeparam name="TValue">
+/// The type of the operation result.
 /// </typeparam>
-public class Response<TResult> : Response
+public class Result<TValue> : Result
 {
-    private TResult? result;
+    private TValue? value;
 
     /// <summary>
-    /// Gets the <typeparamref name="TResult"/> of the operation.
+    /// Gets the <typeparamref name="TValue"/> of the operation.
     /// </summary>
-    public virtual TResult? Result
+    public virtual TValue? Value
     {
-        get => result;
-        init => result = value;
+        get => value;
+        init => this.value = value;
     }
 
-    /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Result))]
-    public virtual bool HasResult { get => Result != null; }
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(false, nameof(Result))]
-    public virtual bool HasNoResult { get => Result == null; }
+    /// <summary>
+    /// Gets <c>true</c> whether the <see cref="Result{TValue}.Value"/> has value; otherwise, <c>false</c>.
+    /// </summary>
+    [MemberNotNullWhen(true, nameof(Value))]
+    public virtual bool HasValue { get => Value != null; }
 
     /// <summary>
-    /// Appends the last <see cref="IResponse"/>.
+    /// Gets <c>true</c> whether the <see cref="Result{TValue}.Value"/> no has value; otherwise, <c>false</c>.
     /// </summary>
-    public override IResponse? AppendResponse
+    [MemberNotNullWhen(false, nameof(Value))]
+    public virtual bool HasNoValue { get => Value == null; }
+
+    /// <summary>
+    /// Appends the last <see cref="IResult"/>.
+    /// </summary>
+    public override IResult? AppendResponse
     {
         init
         {
-            if (value is IResponse lastResponse)
+            if (value is IResult lastResponse)
             {
                 Error? error = null;
-                TResult? result = default;
+                TValue? _value = default;
                 object? objToLook = lastResponse;
-                while (objToLook?.GetType().GetProperty(nameof(Result)) is PropertyInfo propertyInfo)
+                while (objToLook?.GetType().GetProperty(nameof(Value)) is PropertyInfo propertyInfo)
                 {
                     objToLook = propertyInfo.GetValue(objToLook);
-                    if (typeof(TResult).IsAssignableFrom(propertyInfo.PropertyType))
+                    if (typeof(TValue).IsAssignableFrom(propertyInfo.PropertyType))
                     {
-                        if (objToLook is TResult typedResult)
+                        if (objToLook is TValue typedResult)
                         {
-                            result = typedResult;
+                            _value = typedResult;
                             break;
                         }
                         else if (objToLook == null)
                         {
-                            result = default;
+                            _value = default;
                             break;
                         }
                     }
                 }
-                Result = result;
+                Value = _value;
                 Error = error;
             }
         }
@@ -179,12 +183,12 @@ public class Response<TResult> : Response
     /// <summary>
     /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
-    /// <param name="result">
-    /// The <typeparamref name="TResult"/> to return.
+    /// <param name="value">
+    /// The <typeparamref name="TValue"/> to return.
     /// </param>
-    public static implicit operator Response<TResult>(TResult result)
+    public static implicit operator Result<TValue>(TValue value)
     {
-        return new Response<TResult>() { Result = result };
+        return new Result<TValue>() { Value = value };
     }
 
     /// <summary>
@@ -193,9 +197,9 @@ public class Response<TResult> : Response
     /// <param name="error">
     /// The <see cref="Error"/> to return.
     /// </param>
-    public static implicit operator Response<TResult>(Error error)
+    public static implicit operator Result<TValue>(Error error)
     {
-        return new Response<TResult>() { Error = error };
+        return new Result<TValue>() { Error = error };
     }
 
     /// <summary>
@@ -204,20 +208,23 @@ public class Response<TResult> : Response
     /// <param name="exception">
     /// The <see cref="Exception"/> to return.
     /// </param>
-    public static implicit operator Response<TResult>(Exception exception)
+    public static implicit operator Result<TValue>(Exception exception)
     {
-        return new Response<TResult>() { AppendException = exception };
+        return new Result<TValue>() { AppendException = exception };
     }
 
-    /// <inheritdoc/>
-    [MemberNotNull(nameof(Result))]
+    /// <summary>
+    /// Throws if the result has any error or has no result.
+    /// </summary>
+    /// <exception cref="EmptyResultException">the <see cref="Result{TValue}.Value"/> has no value.</exception>
+    [MemberNotNull(nameof(Value))]
     public virtual void ThrowIfErrorOrHasNoResult()
     {
         if (IsError)
         {
             throw Error.Exception ?? new Exception(Error.Message);
         }
-        else if (HasNoResult)
+        else if (HasNoValue)
         {
             throw new EmptyResultException();
         }

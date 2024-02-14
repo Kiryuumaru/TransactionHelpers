@@ -4,9 +4,9 @@ using System;
 namespace TransactionHelpers.Interface;
 
 /// <summary>
-/// The interface for all responses.
+/// The interface for all results.
 /// </summary>
-public interface IResponse
+public interface IResult
 {
     /// <summary>
     /// Gets the <see cref="TransactionHelpers.Error"/> of the operation.
@@ -26,7 +26,7 @@ public interface IResponse
     public bool IsError { get; }
 
     /// <summary>
-    /// Throws if the response has any error.
+    /// Throws if the result has any error.
     /// </summary>
     void ThrowIfError();
 }
