@@ -1,2 +1,2 @@
-1.1.5
-* Updated dependencies
+2.0.0
+* Updated logics

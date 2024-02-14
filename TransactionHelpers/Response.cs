@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using TransactionHelpers.Exceptions;
 using TransactionHelpers.Interface;
+using TransactionHelpers.Exceptions;
 
 namespace TransactionHelpers;
 
@@ -21,7 +21,7 @@ public class Response : IResponse
         get => error;
         init
         {
-            if (value == null || value.Exception == null || value.Exception is EmptyResultException || string.IsNullOrEmpty(value.Message))
+            if (value != null && (value.Exception == null || string.IsNullOrEmpty(value.Message)))
             {
                 error = null;
             }
@@ -47,7 +47,7 @@ public class Response : IResponse
     {
         init
         {
-            Error = new Error() { Exception = value };
+            Error = new() { Exception = value };
         }
     }
 
@@ -58,9 +58,9 @@ public class Response : IResponse
     {
         init
         {
-            if (value is IResponse lastResponse)
+            if (value is IResponse response)
             {
-                Error = lastResponse.Error;
+                Error = response.Error;
             }
         }
     }
@@ -120,15 +120,9 @@ public class Response : IResponse
 /// <typeparam name="TResult">
 /// The type of the operation response.
 /// </typeparam>
-public class Response<TResult> : IResponse
+public class Response<TResult> : Response
 {
-    private static readonly Error EmptyResultError = new()
-    {
-        Exception = new EmptyResultException()
-    };
-
     private TResult? result;
-    private Error? error;
 
     /// <summary>
     /// Gets the <typeparamref name="TResult"/> of the operation.
@@ -136,66 +130,21 @@ public class Response<TResult> : IResponse
     public virtual TResult? Result
     {
         get => result;
-        init
-        {
-            if (value != null)
-            {
-                Error = default;
-            }
-            result = value;
-        }
+        init => result = value;
     }
 
     /// <inheritdoc/>
-    public virtual Error? Error
-    {
-        get
-        {
-            if (error == null && Result == null)
-            {
-                return EmptyResultError;
-            }
-            return error;
-        }
-        init
-        {
-            if (value == null || value.Exception == null || value.Exception is EmptyResultException || string.IsNullOrEmpty(value.Message))
-            {
-                error = null;
-            }
-            else
-            {
-                Result = default;
-                error = value;
-            }
-        }
-    }
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(false, nameof(Error))]
     [MemberNotNullWhen(true, nameof(Result))]
-    public virtual bool IsSuccess { get => error == null && Result != null; }
+    public virtual bool HasResult { get => Result != null; }
 
     /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
     [MemberNotNullWhen(false, nameof(Result))]
-    public virtual bool IsError { get => error != null || Result == null; }
-
-    /// <summary>
-    /// Appends an <see cref="Exception"/>.
-    /// </summary>
-    public virtual Exception? AppendException
-    {
-        init
-        {
-            Error = new Error() { Exception = value };
-        }
-    }
+    public virtual bool HasNoResult { get => Result == null; }
 
     /// <summary>
     /// Appends the last <see cref="IResponse"/>.
     /// </summary>
-    public virtual IResponse? AppendResponse
+    public override IResponse? AppendResponse
     {
         init
         {
@@ -203,10 +152,6 @@ public class Response<TResult> : IResponse
             {
                 Error? error = null;
                 TResult? result = default;
-                if (lastResponse.Error?.Exception is not EmptyResultException)
-                {
-                    error = lastResponse.Error;
-                }
                 object? objToLook = lastResponse;
                 while (objToLook?.GetType().GetProperty(nameof(Result)) is PropertyInfo propertyInfo)
                 {
@@ -232,24 +177,7 @@ public class Response<TResult> : IResponse
     }
 
     /// <summary>
-    /// Appends the last <see cref="IResponse"/>.
-    /// </summary>
-    public virtual IResponse?[]? AppendResponses
-    {
-        init
-        {
-            if (value != null)
-            {
-                foreach (var response in value)
-                {
-                    AppendResponse = response;
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
     /// <param name="result">
     /// The <typeparamref name="TResult"/> to return.
@@ -260,10 +188,10 @@ public class Response<TResult> : IResponse
     }
 
     /// <summary>
-    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
     /// <param name="error">
-    /// The <see cref="TransactionHelpers.Error"/> to return.
+    /// The <see cref="Error"/> to return.
     /// </param>
     public static implicit operator Response<TResult>(Error error)
     {
@@ -271,7 +199,7 @@ public class Response<TResult> : IResponse
     }
 
     /// <summary>
-    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
     /// <param name="exception">
     /// The <see cref="Exception"/> to return.
@@ -283,11 +211,15 @@ public class Response<TResult> : IResponse
 
     /// <inheritdoc/>
     [MemberNotNull(nameof(Result))]
-    public virtual void ThrowIfError()
+    public virtual void ThrowIfErrorOrHasNoResult()
     {
         if (IsError)
         {
             throw Error.Exception ?? new Exception(Error.Message);
+        }
+        else if (HasNoResult)
+        {
+            throw new EmptyResultException();
         }
     }
 }
