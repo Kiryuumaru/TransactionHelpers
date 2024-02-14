@@ -5,83 +5,83 @@ namespace TransactionHelpers.UnitTest
     public class UnitTest1
     {
         [Fact]
-        public void ResponseTest()
+        public void ResultTest()
         {
-            Result response1 = new();
+            Result result1 = new();
 
-            Assert.True(response1.IsSuccess);
-            Assert.False(response1.IsError);
-            Assert.Null(response1.Error);
+            Assert.True(result1.IsSuccess);
+            Assert.False(result1.IsError);
+            Assert.Null(result1.Error);
 
-            response1 = new()
+            result1 = new()
             {
-                AppendResponse = response1,
+                AppendResult = result1,
                 AppendException = new Exception()
             };
 
-            Assert.False(response1.IsSuccess);
-            Assert.True(response1.IsError);
-            Assert.NotNull(response1.Error);
-            Assert.Throws<Exception>(response1.ThrowIfError);
+            Assert.False(result1.IsSuccess);
+            Assert.True(result1.IsError);
+            Assert.NotNull(result1.Error);
+            Assert.Throws<Exception>(result1.ThrowIfError);
 
-            Result response2 = new();
+            Result result2 = new();
 
-            response2 = new()
+            result2 = new()
             {
-                AppendResponse = response1
+                AppendResult = result1
             };
 
-            Assert.False(response2.IsSuccess);
-            Assert.True(response2.IsError);
-            Assert.NotNull(response2.Error);
-            Assert.Throws<Exception>(response2.ThrowIfError);
+            Assert.False(result2.IsSuccess);
+            Assert.True(result2.IsError);
+            Assert.NotNull(result2.Error);
+            Assert.Throws<Exception>(result2.ThrowIfError);
         }
 
         [Fact]
-        public void TypedResponseTest()
+        public void TypedResultTest()
         {
-            Result<string> response1 = new();
+            Result<string> result1 = new();
 
-            Assert.True(response1.IsSuccess);
-            Assert.False(response1.IsError);
-            Assert.Null(response1.Error);
-            Assert.Throws<EmptyResultException>(response1.ThrowIfErrorOrHasNoResult);
+            Assert.True(result1.IsSuccess);
+            Assert.False(result1.IsError);
+            Assert.Null(result1.Error);
+            Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoResult);
 
-            response1 = new()
+            result1 = new()
             {
-                AppendResponse = response1,
+                AppendResult = result1,
                 Value = "test"
             };
 
-            Assert.True(response1.IsSuccess);
-            Assert.False(response1.IsError);
-            Assert.Null(response1.Error);
+            Assert.True(result1.IsSuccess);
+            Assert.False(result1.IsError);
+            Assert.Null(result1.Error);
 
-            Result<string> response2 = new();
+            Result<string> result2 = new();
 
-            response2 = new()
+            result2 = new()
             {
-                AppendResponse = response1,
+                AppendResult = result1,
             };
 
-            Assert.True(response2.IsSuccess);
-            Assert.False(response2.IsError);
-            Assert.Null(response2.Error);
+            Assert.True(result2.IsSuccess);
+            Assert.False(result2.IsError);
+            Assert.Null(result2.Error);
         }
 
         [Fact]
-        public void CascadeTypedResponseTest()
+        public void CascadeTypedResultTest()
         {
-            Result<Result<Result<string>>> response1 = new();
+            Result<Result<Result<string>>> result1 = new();
 
-            Assert.True(response1.IsSuccess);
-            Assert.False(response1.IsError);
-            Assert.Null(response1.Error);
-            Assert.Throws<EmptyResultException>(response1.ThrowIfErrorOrHasNoResult);
+            Assert.True(result1.IsSuccess);
+            Assert.False(result1.IsError);
+            Assert.Null(result1.Error);
+            Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoResult);
 
-            response1 = new()
+            result1 = new()
             {
-                AppendResponse = response1,
+                AppendResult = result1,
                 Value = new()
                 {
                     Value = new()
@@ -91,21 +91,21 @@ namespace TransactionHelpers.UnitTest
                 }
             };
 
-            Assert.True(response1.IsSuccess);
-            Assert.False(response1.IsError);
-            Assert.Null(response1.Error);
+            Assert.True(result1.IsSuccess);
+            Assert.False(result1.IsError);
+            Assert.Null(result1.Error);
 
-            Result<string> response2 = new();
+            Result<string> result2 = new();
 
-            response2 = new()
+            result2 = new()
             {
-                AppendResponse = response1,
+                AppendResult = result1,
             };
 
-            Assert.True(response2.IsSuccess);
-            Assert.False(response2.IsError);
-            Assert.Null(response2.Error);
-            Assert.Equal(response1.Value.Value.Value, response2.Value);
+            Assert.True(result2.IsSuccess);
+            Assert.False(result2.IsError);
+            Assert.Null(result2.Error);
+            Assert.Equal(result1.Value.Value.Value, result2.Value);
         }
     }
 }

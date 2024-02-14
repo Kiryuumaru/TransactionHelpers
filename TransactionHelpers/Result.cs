@@ -54,13 +54,13 @@ public class Result : IResult
     /// <summary>
     /// Appends the last <see cref="IResult"/>.
     /// </summary>
-    public virtual IResult? AppendResponse
+    public virtual IResult? AppendResult
     {
         init
         {
-            if (value is IResult response)
+            if (value is IResult result)
             {
-                Error = response.Error;
+                Error = result.Error;
             }
         }
     }
@@ -68,15 +68,15 @@ public class Result : IResult
     /// <summary>
     /// Appends the last <see cref="IResult"/>.
     /// </summary>
-    public virtual IResult?[]? AppendResponses
+    public virtual IResult?[]? AppendResults
     {
         init
         {
             if (value != null)
             {
-                foreach (var response in value)
+                foreach (var result in value)
                 {
-                    AppendResponse = response;
+                    AppendResult = result;
                 }
             }
         }
@@ -148,15 +148,15 @@ public class Result<TValue> : Result
     /// <summary>
     /// Appends the last <see cref="IResult"/>.
     /// </summary>
-    public override IResult? AppendResponse
+    public override IResult? AppendResult
     {
         init
         {
-            if (value is IResult lastResponse)
+            if (value is IResult lastResult)
             {
                 Error? error = null;
                 TValue? _value = default;
-                object? objToLook = lastResponse;
+                object? objToLook = lastResult;
                 while (objToLook?.GetType().GetProperty(nameof(Value)) is PropertyInfo propertyInfo)
                 {
                     objToLook = propertyInfo.GetValue(objToLook);
