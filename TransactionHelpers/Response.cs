@@ -82,6 +82,28 @@ public class Response : IResponse
         }
     }
 
+    /// <summary>
+    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// </summary>
+    /// <param name="error">
+    /// The <see cref="TransactionHelpers.Error"/> to return.
+    /// </param>
+    public static implicit operator Response(Error error)
+    {
+        return new() { Error = error };
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// </summary>
+    /// <param name="exception">
+    /// The <see cref="Exception"/> to return.
+    /// </param>
+    public static implicit operator Response(Exception exception)
+    {
+        return new() { AppendException = exception };
+    }
+
     /// <inheritdoc/>
     public virtual void ThrowIfError()
     {
@@ -224,6 +246,39 @@ public class Response<TResult> : IResponse
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// </summary>
+    /// <param name="result">
+    /// The <typeparamref name="TResult"/> to return.
+    /// </param>
+    public static implicit operator Response<TResult>(TResult result)
+    {
+        return new Response<TResult>() { Result = result };
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// </summary>
+    /// <param name="error">
+    /// The <see cref="TransactionHelpers.Error"/> to return.
+    /// </param>
+    public static implicit operator Response<TResult>(Error error)
+    {
+        return new Response<TResult>() { Error = error };
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="TransactionHelpers.Error"/> conversion.
+    /// </summary>
+    /// <param name="exception">
+    /// The <see cref="Exception"/> to return.
+    /// </param>
+    public static implicit operator Response<TResult>(Exception exception)
+    {
+        return new Response<TResult>() { AppendException = exception };
     }
 
     /// <inheritdoc/>
