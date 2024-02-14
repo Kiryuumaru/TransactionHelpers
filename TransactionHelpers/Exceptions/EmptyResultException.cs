@@ -3,7 +3,7 @@
 namespace TransactionHelpers.Exceptions;
 
 /// <summary>
-/// Exception for responses with no result and no error.
+/// Exception for responses with no result and no _error.
 /// </summary>
 public class EmptyResultException : Exception
 {

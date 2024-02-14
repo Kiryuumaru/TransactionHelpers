@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using TransactionHelpers.Interface;
 using TransactionHelpers.Exceptions;
+using System.Collections.Generic;
 
 namespace TransactionHelpers;
 
@@ -13,24 +14,13 @@ namespace TransactionHelpers;
 /// </summary>
 public class Result : IResult
 {
-    private Error? error;
+    private List<Error> _errors = new();
 
     /// <inheritdoc/>
-    public virtual Error? Error
-    {
-        get => error;
-        init
-        {
-            if (value != null && (value.Exception == null || string.IsNullOrEmpty(value.Message)))
-            {
-                error = null;
-            }
-            else
-            {
-                error = value;
-            }
-        }
-    }
+    public virtual Error? Error => _errors.LastOrDefault();
+
+    /// <inheritdoc/>
+    public virtual IReadOnlyList<Error> Errors => _errors.AsReadOnly();
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
@@ -40,46 +30,79 @@ public class Result : IResult
     [MemberNotNullWhen(true, nameof(Error))]
     public virtual bool IsError { get => Error != null; }
 
-    /// <summary>
-    /// Appends an <see cref="Exception"/>.
-    /// </summary>
-    public virtual Exception? AppendException
+    /// <inheritdoc/>
+    public virtual void ThrowIfError()
     {
-        init
+        if (Error != null)
         {
-            Error = new() { Exception = value };
+            throw Error.Exception ?? new Exception(Error.Message);
         }
     }
 
     /// <summary>
-    /// Appends the last <see cref="IResult"/>.
+    /// Append errors to result.
     /// </summary>
-    public virtual IResult? AppendResult
+    /// <param name="errors">The errors to append.</param>
+    /// <returns>The same result instance</returns>
+    public virtual Result WithError(params Error?[]? errors)
     {
-        init
+        if (errors != null)
         {
-            if (value is IResult result)
+            foreach (var error in errors)
             {
-                Error = result.Error;
+                if (error == null || error.Exception == null || string.IsNullOrEmpty(error.Message))
+                {
+                    continue;
+                }
+                _errors.Add(error);
             }
         }
+        return this;
     }
 
     /// <summary>
-    /// Appends the last <see cref="IResult"/>.
+    /// Append errors to result.
     /// </summary>
-    public virtual IResult?[]? AppendResults
+    /// <param name="exceptions">The exceptions to append.</param>
+    /// <returns>The same result instance.</returns>
+    public virtual Result WithError(params Exception?[]? exceptions)
     {
-        init
+        if (exceptions != null)
         {
-            if (value != null)
+            foreach (var exception in exceptions)
             {
-                foreach (var result in value)
+                if (exception == null)
                 {
-                    AppendResult = result;
+                    continue;
+                }
+                _errors.Add(new Error() { Exception = exception });
+            }
+        }
+        return this;
+    }
+
+    /// <summary>
+    /// Append errors to result.
+    /// </summary>
+    /// <param name="results">The results to append.</param>
+    /// <returns>The same result instance.</returns>
+    public virtual Result WithResult(params IResult?[]? results)
+    {
+        if (results != null)
+        {
+            foreach (var result in results)
+            {
+                if (result == null)
+                {
+                    continue;
+                }
+                foreach (var error in result.Errors)
+                {
+                    _errors.Add(error);
                 }
             }
         }
+        return this;
     }
 
     /// <summary>
@@ -88,9 +111,9 @@ public class Result : IResult
     /// <param name="error">
     /// The <see cref="TransactionHelpers.Error"/> to return.
     /// </param>
-    public static implicit operator Result(Error error)
+    public static implicit operator Result(Error? error)
     {
-        return new() { Error = error };
+        return new Result().WithError(error);
     }
 
     /// <summary>
@@ -99,18 +122,9 @@ public class Result : IResult
     /// <param name="exception">
     /// The <see cref="Exception"/> to return.
     /// </param>
-    public static implicit operator Result(Exception exception)
+    public static implicit operator Result(Exception? exception)
     {
-        return new() { AppendException = exception };
-    }
-
-    /// <inheritdoc/>
-    public virtual void ThrowIfError()
-    {
-        if (Error != null)
-        {
-            throw Error.Exception ?? new Exception(Error.Message);
-        }
+        return new Result().WithError(exception);
     }
 }
 
@@ -122,16 +136,12 @@ public class Result : IResult
 /// </typeparam>
 public class Result<TValue> : Result
 {
-    private TValue? value;
+    private TValue? _value;
 
     /// <summary>
     /// Gets the <typeparamref name="TValue"/> of the operation.
     /// </summary>
-    public virtual TValue? Value
-    {
-        get => value;
-        init => this.value = value;
-    }
+    public virtual TValue? Value => _value;
 
     /// <summary>
     /// Gets <c>true</c> whether the <see cref="Result{TValue}.Value"/> has value; otherwise, <c>false</c>.
@@ -146,75 +156,7 @@ public class Result<TValue> : Result
     public virtual bool HasNoValue { get => Value == null; }
 
     /// <summary>
-    /// Appends the last <see cref="IResult"/>.
-    /// </summary>
-    public override IResult? AppendResult
-    {
-        init
-        {
-            if (value is IResult lastResult)
-            {
-                Error? error = null;
-                TValue? _value = default;
-                object? objToLook = lastResult;
-                while (objToLook?.GetType().GetProperty(nameof(Value)) is PropertyInfo propertyInfo)
-                {
-                    objToLook = propertyInfo.GetValue(objToLook);
-                    if (typeof(TValue).IsAssignableFrom(propertyInfo.PropertyType))
-                    {
-                        if (objToLook is TValue typedResult)
-                        {
-                            _value = typedResult;
-                            break;
-                        }
-                        else if (objToLook == null)
-                        {
-                            _value = default;
-                            break;
-                        }
-                    }
-                }
-                Value = _value;
-                Error = error;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Implicit operator for <see cref="Error"/> conversion.
-    /// </summary>
-    /// <param name="value">
-    /// The <typeparamref name="TValue"/> to return.
-    /// </param>
-    public static implicit operator Result<TValue>(TValue value)
-    {
-        return new Result<TValue>() { Value = value };
-    }
-
-    /// <summary>
-    /// Implicit operator for <see cref="Error"/> conversion.
-    /// </summary>
-    /// <param name="error">
-    /// The <see cref="Error"/> to return.
-    /// </param>
-    public static implicit operator Result<TValue>(Error error)
-    {
-        return new Result<TValue>() { Error = error };
-    }
-
-    /// <summary>
-    /// Implicit operator for <see cref="Error"/> conversion.
-    /// </summary>
-    /// <param name="exception">
-    /// The <see cref="Exception"/> to return.
-    /// </param>
-    public static implicit operator Result<TValue>(Exception exception)
-    {
-        return new Result<TValue>() { AppendException = exception };
-    }
-
-    /// <summary>
-    /// Throws if the result has any error or has no result.
+    /// Throws if the result has any _error or has no result.
     /// </summary>
     /// <exception cref="EmptyResultException">the <see cref="Result{TValue}.Value"/> has no value.</exception>
     [MemberNotNull(nameof(Value))]
@@ -228,5 +170,108 @@ public class Result<TValue> : Result
         {
             throw new EmptyResultException();
         }
+    }
+
+    /// <summary>
+    /// Add value to result.
+    /// </summary>
+    /// <param name="value">The value to add.</param>
+    /// <returns>The same result instance.</returns>
+    public virtual Result<TValue> WithValue(TValue value)
+    {
+        _value = value;
+        return this;
+    }
+
+    /// <summary>
+    /// Append errors to result.
+    /// </summary>
+    /// <param name="errors">The errors to append.</param>
+    /// <returns>The same result instance</returns>
+    public new virtual Result<TValue> WithError(params Error?[]? errors)
+    {
+        base.WithError(errors);
+        return this;
+    }
+
+    /// <summary>
+    /// Append errors to result.
+    /// </summary>
+    /// <param name="exceptions">The exceptions to append.</param>
+    /// <returns>The same result instance.</returns>
+    public new virtual Result<TValue> WithError(params Exception?[]? exceptions)
+    {
+        base.WithError(exceptions);
+        return this;
+    }
+
+    /// <summary>
+    /// Append errors to result.
+    /// </summary>
+    /// <param name="results">The results to append.</param>
+    /// <returns>The same result instance.</returns>
+    public new virtual Result<TValue> WithResult(params IResult?[]? results)
+    {
+        if (results != null)
+        {
+            foreach (var result in results)
+            {
+                if (result == null)
+                {
+                    continue;
+                }
+                WithError(result.Errors.ToArray());
+                object? objToLook = result;
+                while (objToLook?.GetType().GetProperty(nameof(Value)) is PropertyInfo propertyInfo)
+                {
+                    objToLook = propertyInfo.GetValue(objToLook);
+                    if (typeof(TValue).IsAssignableFrom(propertyInfo.PropertyType))
+                    {
+                        if (objToLook is TValue typedResult)
+                        {
+                            _value = typedResult;
+                        }
+                        else if (objToLook == null)
+                        {
+                            _value = default;
+                        }
+                    }
+                }
+            }
+        }
+        return this;
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="Error"/> conversion.
+    /// </summary>
+    /// <param name="value">
+    /// The <typeparamref name="TValue"/> to return.
+    /// </param>
+    public static implicit operator Result<TValue>(TValue value)
+    {
+        return new Result<TValue>().WithValue(value);
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="Error"/> conversion.
+    /// </summary>
+    /// <param name="error">
+    /// The <see cref="Error"/> to return.
+    /// </param>
+    public static implicit operator Result<TValue>(Error error)
+    {
+        return new Result<TValue>().WithError(error);
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="Error"/> conversion.
+    /// </summary>
+    /// <param name="exception">
+    /// The <see cref="Exception"/> to return.
+    /// </param>
+    public static implicit operator Result<TValue>(Exception exception)
+    {
+        return new Result<TValue>().WithError(exception);
     }
 }

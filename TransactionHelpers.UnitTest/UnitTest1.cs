@@ -13,11 +13,9 @@ namespace TransactionHelpers.UnitTest
             Assert.False(result1.IsError);
             Assert.Null(result1.Error);
 
-            result1 = new()
-            {
-                AppendResult = result1,
-                AppendException = new Exception()
-            };
+            result1
+                .WithResult(result1)
+                .WithError(new Exception());
 
             Assert.False(result1.IsSuccess);
             Assert.True(result1.IsError);
@@ -26,10 +24,8 @@ namespace TransactionHelpers.UnitTest
 
             Result result2 = new();
 
-            result2 = new()
-            {
-                AppendResult = result1
-            };
+            result2
+                .WithResult(result1);
 
             Assert.False(result2.IsSuccess);
             Assert.True(result2.IsError);
@@ -47,11 +43,9 @@ namespace TransactionHelpers.UnitTest
             Assert.Null(result1.Error);
             Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoResult);
 
-            result1 = new()
-            {
-                AppendResult = result1,
-                Value = "test"
-            };
+            result1
+                .WithResult(result1)
+                .WithValue("test");
 
             Assert.True(result1.IsSuccess);
             Assert.False(result1.IsError);
@@ -59,10 +53,8 @@ namespace TransactionHelpers.UnitTest
 
             Result<string> result2 = new();
 
-            result2 = new()
-            {
-                AppendResult = result1,
-            };
+            result2
+                .WithResult(result1);
 
             Assert.True(result2.IsSuccess);
             Assert.False(result2.IsError);
@@ -79,17 +71,11 @@ namespace TransactionHelpers.UnitTest
             Assert.Null(result1.Error);
             Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoResult);
 
-            result1 = new()
-            {
-                AppendResult = result1,
-                Value = new()
-                {
-                    Value = new()
-                    {
-                        Value = "test"
-                    }
-                }
-            };
+            result1
+                .WithResult(result1)
+                .WithValue(new Result<Result<string>>()
+                    .WithValue(new Result<string>()
+                        .WithValue("test")));
 
             Assert.True(result1.IsSuccess);
             Assert.False(result1.IsError);
@@ -97,15 +83,15 @@ namespace TransactionHelpers.UnitTest
 
             Result<string> result2 = new();
 
-            result2 = new()
-            {
-                AppendResult = result1,
-            };
+            result2
+                .WithResult(result1);
 
             Assert.True(result2.IsSuccess);
             Assert.False(result2.IsError);
             Assert.Null(result2.Error);
-            Assert.Equal(result1.Value.Value.Value, result2.Value);
+            Assert.Equal(result1.Value?.Value?.Value, result2.Value);
+            Assert.Equal("test", result1.Value?.Value?.Value);
+            Assert.Equal("test", result2.Value);
         }
     }
 }

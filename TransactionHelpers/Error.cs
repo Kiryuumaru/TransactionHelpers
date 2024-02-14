@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 namespace TransactionHelpers;
 
 /// <summary>
-/// Represents the error holder for all transactions.
+/// Represents the _error holder for all transactions.
 /// </summary>
 public class Error
 {
@@ -14,7 +14,7 @@ public class Error
     private Exception? messageException;
 
     /// <summary>
-    /// Gets the <see cref="System.Exception"/> of the error.
+    /// Gets the <see cref="System.Exception"/> of the _error.
     /// </summary>
     [JsonIgnore]
     public Exception? Exception
@@ -34,7 +34,7 @@ public class Error
     }
 
     /// <summary>
-    /// Gets the message of the error.
+    /// Gets the message of the _error.
     /// </summary>
     public string? Message
     {
