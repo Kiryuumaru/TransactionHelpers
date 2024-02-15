@@ -85,7 +85,7 @@ public class Result<TValue> : Result, IResult<TValue>
 
     /// <inheritdoc/>
     [MemberNotNull(nameof(Value))]
-    public virtual void ThrowIfErrorOrHasNoResult()
+    public virtual void ThrowIfErrorOrHasNoValue()
     {
         if (IsError)
         {
@@ -128,5 +128,16 @@ public class Result<TValue> : Result, IResult<TValue>
     public static implicit operator Result<TValue>(Exception exception)
     {
         return new Result<TValue>().WithError(exception);
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="Result{TValue}"/> to <typeparamref name="TValue"/> conversion.
+    /// </summary>
+    /// <param name="result">
+    /// The <see cref="Result{TValue}"/> to convert.
+    /// </param>
+    public static implicit operator TValue?(Result<TValue> result)
+    {
+        return result.Value;
     }
 }

@@ -60,9 +60,9 @@ public interface IResult<TValue> : IResult
     bool HasNoValue { get; }
 
     /// <summary>
-    /// Throws if the result has any _error or has no result.
+    /// Throws if the result has any _error or has no value.
     /// </summary>
     /// <exception cref="EmptyResultException">the <see cref="IResult{TValue}.Value"/> has no value.</exception>
     [MemberNotNull(nameof(Value))]
-    void ThrowIfErrorOrHasNoResult();
+    void ThrowIfErrorOrHasNoValue();
 }

@@ -41,7 +41,7 @@ namespace TransactionHelpers.UnitTest
             Assert.True(result1.IsSuccess);
             Assert.False(result1.IsError);
             Assert.Null(result1.Error);
-            Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoResult);
+            Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoValue);
 
             result1
                 .WithResult(result1)
@@ -69,7 +69,7 @@ namespace TransactionHelpers.UnitTest
             Assert.True(result1.IsSuccess);
             Assert.False(result1.IsError);
             Assert.Null(result1.Error);
-            Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoResult);
+            Assert.Throws<EmptyResultException>(result1.ThrowIfErrorOrHasNoValue);
 
             result1
                 .WithResult(result1)
