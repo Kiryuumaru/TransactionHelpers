@@ -177,7 +177,7 @@ public class Result<TValue> : Result
     /// </summary>
     /// <param name="value">The value to add.</param>
     /// <returns>The same result instance.</returns>
-    public virtual Result<TValue> WithValue(TValue value)
+    public virtual Result<TValue> WithValue(TValue? value)
     {
         _value = value;
         return this;
@@ -248,7 +248,7 @@ public class Result<TValue> : Result
     /// <param name="value">
     /// The <typeparamref name="TValue"/> to return.
     /// </param>
-    public static implicit operator Result<TValue>(TValue value)
+    public static implicit operator Result<TValue>(TValue? value)
     {
         return new Result<TValue>().WithValue(value);
     }

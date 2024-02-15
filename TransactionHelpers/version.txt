@@ -1,2 +1,2 @@
-2.0.5
-* Fixed namings
+2.0.6
+* Fixed nullables
