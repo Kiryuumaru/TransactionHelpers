@@ -60,6 +60,28 @@ public class Result : IResult
     {
         return new Result().WithError(exception);
     }
+
+    /// <summary>
+    /// Implicit operator for <see cref="Result{TValue}"/> to <see cref="Error"/> conversion.
+    /// </summary>
+    /// <param name="result">
+    /// The <see cref="Result{TValue}"/> to convert.
+    /// </param>
+    public static implicit operator Error?(Result result)
+    {
+        return result.Error;
+    }
+
+    /// <summary>
+    /// Implicit operator for <see cref="Result{TValue}"/> to <see cref="Exception"/> conversion.
+    /// </summary>
+    /// <param name="result">
+    /// The <see cref="Result{TValue}"/> to convert.
+    /// </param>
+    public static implicit operator Exception?(Result result)
+    {
+        return result.Error?.Exception;
+    }
 }
 
 /// <summary>

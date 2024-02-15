@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using TransactionHelpers.Exceptions;
+using System.Text.Json.Serialization;
 
 namespace TransactionHelpers.Interface;
 
@@ -12,6 +13,7 @@ public interface IResult
     /// <summary>
     /// Gets the last <see cref="TransactionHelpers.Error"/> of the operation.
     /// </summary>
+    [JsonIgnore]
     Error? Error { get; }
 
     /// <summary>
@@ -29,6 +31,7 @@ public interface IResult
     /// Gets <c>true</c> whether the operation is successful; otherwise, <c>false</c>.
     /// </summary>
     [MemberNotNullWhen(true, nameof(Error))]
+    [JsonIgnore]
     bool IsError { get; }
 
     /// <summary>
@@ -57,6 +60,7 @@ public interface IResult<TValue> : IResult
     /// Gets <c>true</c> whether the <see cref="IResult{TValue}.Value"/> no has value; otherwise, <c>false</c>.
     /// </summary>
     [MemberNotNullWhen(false, nameof(Value))]
+    [JsonIgnore]
     bool HasNoValue { get; }
 
     /// <summary>
