@@ -6,7 +6,7 @@ using TransactionHelpers.Interface;
 namespace TransactionHelpers;
 
 /// <summary>
-/// Provides fluent extension methods for <see cref="Result"/> and <see cref="Result{TValue}"/>.
+/// Provides fluent extension methods for <see cref="IResult"/> and <see cref="IResult{TValue}"/>.
 /// </summary>
 public static class ResultExtension
 {
@@ -21,7 +21,7 @@ public static class ResultExtension
     /// Errors will only be added if they are not null and contain both exception and message information.
     /// </remarks>
     public static T WithError<T>(this T result, params Error?[]? errors)
-        where T : Result
+        where T : IResult
     {
         if (errors != null)
         {
@@ -31,7 +31,10 @@ public static class ResultExtension
                 {
                     continue;
                 }
-                result.InternalError.Add(error);
+                if (result is Result typedResult)
+                {
+                    typedResult.InternalError.Add(error);
+                }
             }
         }
         return result;
@@ -45,7 +48,7 @@ public static class ResultExtension
     /// <param name="exceptions">An array of nullable exceptions to add.</param>
     /// <returns>The result with added errors.</returns>
     public static T WithError<T>(this T result, params Exception?[]? exceptions)
-        where T : Result
+        where T : IResult
     {
         if (exceptions != null)
         {
@@ -55,7 +58,10 @@ public static class ResultExtension
                 {
                     continue;
                 }
-                result.InternalError.Add(new Error() { Exception = exception });
+                if (result is Result typedResult)
+                {
+                    typedResult.InternalError.Add(new Error() { Exception = exception });
+                }
             }
         }
         return result;
@@ -69,7 +75,7 @@ public static class ResultExtension
     /// <param name="results">An array of nullable results to incorporate errors from.</param>
     /// <returns>The result with incorporated errors.</returns>
     public static T WithResult<T>(this T result, params IResult?[]? results)
-        where T : Result
+        where T : IResult
     {
         if (results != null)
         {
@@ -106,49 +112,11 @@ public static class ResultExtension
     /// <param name="value">The value to set.</param>
     /// <returns>The result with the value set.</returns>
     public static T WithValue<T, TValue>(this T result, TValue? value)
-        where T : Result<TValue>
+        where T : IResult<TValue>
     {
-        result.InternalValue = value;
-        return result;
-    }
-
-    /// <summary>
-    /// Incorporates the results and values of the specified results into the current result.
-    /// </summary>
-    /// <typeparam name="T">The type of result.</typeparam>
-    /// <typeparam name="TValue">The type of value.</typeparam>
-    /// <param name="result">The result to which errors are incorporated.</param>
-    /// <param name="results">An array of nullable results to incorporate errors from.</param>
-    /// <returns>The result with incorporated errors and values.</returns>
-    public static T WithResult<T, TValue>(this T result, params IResult?[]? results)
-        where T : Result<TValue>
-    {
-        if (results != null)
+        if (result is Result<TValue> typedResult)
         {
-            foreach (var r in results)
-            {
-                if (r == null)
-                {
-                    continue;
-                }
-                result.WithError(r.Errors.ToArray());
-                object? objToLook = r;
-                while (objToLook?.GetType().GetProperty(nameof(result.Value)) is PropertyInfo propertyInfo)
-                {
-                    objToLook = propertyInfo.GetValue(objToLook);
-                    if (typeof(TValue).IsAssignableFrom(propertyInfo.PropertyType))
-                    {
-                        if (objToLook is TValue typedResult)
-                        {
-                            result.InternalValue = typedResult;
-                        }
-                        else if (objToLook == null)
-                        {
-                            result.InternalValue = default;
-                        }
-                    }
-                }
-            }
+            typedResult.InternalValue = value;
         }
         return result;
     }
