@@ -1,2 +1,2 @@
-2.0.6
-* Fixed nullables
+2.0.7
+* Fixed fluent methods
