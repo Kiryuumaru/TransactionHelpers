@@ -17,6 +17,7 @@ public class Result : IResult
     internal readonly List<Error> InternalError = new();
 
     /// <inheritdoc/>
+    [JsonIgnore]
     public virtual Error? Error => InternalError.LastOrDefault();
 
     /// <inheritdoc/>
@@ -28,6 +29,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(true, nameof(Error))]
+    [JsonIgnore]
     public virtual bool IsError { get => Error != null; }
 
     /// <inheritdoc/>
@@ -103,6 +105,7 @@ public class Result<TValue> : Result, IResult<TValue>
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Value))]
+    [JsonIgnore]
     public virtual bool HasNoValue { get => Value == null; }
 
     /// <inheritdoc/>
