@@ -21,7 +21,11 @@ public class Result : IResult
     public virtual Error? Error => InternalError.LastOrDefault();
 
     /// <inheritdoc/>
-    public virtual IReadOnlyList<Error> Errors => InternalError.AsReadOnly();
+    public virtual IReadOnlyList<Error> Errors
+    {
+        get => InternalError.AsReadOnly();
+        init => InternalError = value.ToList();
+    }
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
@@ -97,7 +101,11 @@ public class Result<TValue> : Result, IResult<TValue>
     internal TValue? InternalValue;
 
     /// <inheritdoc/>
-    public virtual TValue? Value => InternalValue;
+    public virtual TValue? Value
+    {
+        get => InternalValue;
+        init => InternalValue = value;
+    }
 
     /// <inheritdoc/>
     [MemberNotNullWhen(true, nameof(Value))]
