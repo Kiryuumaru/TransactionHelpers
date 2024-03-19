@@ -47,7 +47,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(true, nameof(Error))]
-    public bool AppendIsError<TAppend>(TAppend resultAppend)
+    public virtual bool AppendIsError<TAppend>(TAppend resultAppend)
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
@@ -145,7 +145,7 @@ public class Result<TValue> : Result, IResult<TValue>
 
     /// <inheritdoc/>
     [MemberNotNullWhen(true, nameof(Error))]
-    public bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend)
+    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(resultAppend);
@@ -154,7 +154,7 @@ public class Result<TValue> : Result, IResult<TValue>
 
     /// <inheritdoc/>
     [MemberNotNullWhen(true, nameof(Error))]
-    public bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(false)] out TAppendValue? value)
+    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(false)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(resultAppend);
