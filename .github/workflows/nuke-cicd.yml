@@ -3,7 +3,7 @@ on:
   push:
     branches:
     - prerelease
-    - main
+    - master
     tags:
     - bump-*
   pull_request:
