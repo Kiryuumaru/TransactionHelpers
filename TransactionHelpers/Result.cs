@@ -46,31 +46,28 @@ public class Result : IResult
     }
 
     /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
-    public virtual bool AppendIsError<TAppend>(TAppend resultAppend)
+    [MemberNotNullWhen(false, nameof(Error))]
+    public virtual bool Append<TAppend>(TAppend resultAppend)
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
-        return resultAppend.IsError;
+        if (resultAppend.GetType().GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
+            hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
+        {
+            return !resultAppend.IsError && !hasNoValue;
+        }
+
+        return !resultAppend.IsError;
     }
 
     /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
-    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend)
-        where TAppend : IResult<TAppendValue>
-    {
-        this.WithResult(resultAppend);
-        return resultAppend.IsError || resultAppend.HasNoValue;
-    }
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
-    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(false)] out TAppendValue? value)
+    [MemberNotNullWhen(false, nameof(Error))]
+    public virtual bool Append<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(resultAppend);
         value = resultAppend.Value;
-        return resultAppend.IsError || resultAppend.HasNoValue;
+        return !resultAppend.IsError && !resultAppend.HasNoValue;
     }
 
     /// <summary>
