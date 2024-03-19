@@ -45,6 +45,15 @@ public class Result : IResult
         }
     }
 
+    /// <inheritdoc/>
+    [MemberNotNullWhen(true, nameof(Error))]
+    public bool AppendIsError<TAppend>(TAppend resultAppend)
+        where TAppend : IResult
+    {
+        this.WithResult(resultAppend);
+        return resultAppend.IsError;
+    }
+
     /// <summary>
     /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
@@ -101,6 +110,10 @@ public class Result<TValue> : Result, IResult<TValue>
     internal TValue? InternalValue;
 
     /// <inheritdoc/>
+    [JsonIgnore]
+    public new virtual Error? Error => base.Error;
+
+    /// <inheritdoc/>
     public virtual TValue? Value
     {
         get => InternalValue;
@@ -122,12 +135,31 @@ public class Result<TValue> : Result, IResult<TValue>
     {
         if (IsError)
         {
-            throw Error.Exception ?? new Exception(Error.Message);
+            throw base.Error.Exception ?? new Exception(base.Error.Message);
         }
         else if (HasNoValue)
         {
             throw new EmptyResultException();
         }
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(true, nameof(Error))]
+    public bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend)
+        where TAppend : IResult<TAppendValue>
+    {
+        this.WithResult(resultAppend);
+        return resultAppend.IsError || resultAppend.HasNoValue;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(true, nameof(Error))]
+    public bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(false)] out TAppendValue? value)
+        where TAppend : IResult<TAppendValue>
+    {
+        this.WithResult(resultAppend);
+        value = resultAppend.Value;
+        return resultAppend.IsError || resultAppend.HasNoValue;
     }
 
     /// <summary>
