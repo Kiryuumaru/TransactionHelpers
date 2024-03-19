@@ -111,7 +111,16 @@ public class Result<TValue> : Result, IResult<TValue>
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public new virtual Error? Error => base.Error;
+    public override Error? Error => base.Error;
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    public override bool IsSuccess => base.IsSuccess;
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(true, nameof(Error))]
+    [JsonIgnore]
+    public override bool IsError => base.IsError;
 
     /// <inheritdoc/>
     public virtual TValue? Value
@@ -142,6 +151,10 @@ public class Result<TValue> : Result, IResult<TValue>
             throw new EmptyResultException();
         }
     }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(true, nameof(Error))]
+    public override bool AppendIsError<TAppend>(TAppend resultAppend) => base.AppendIsError(resultAppend);
 
     /// <inheritdoc/>
     [MemberNotNullWhen(true, nameof(Error))]
