@@ -54,6 +54,25 @@ public class Result : IResult
         return resultAppend.IsError;
     }
 
+    /// <inheritdoc/>
+    [MemberNotNullWhen(true, nameof(Error))]
+    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend)
+        where TAppend : IResult<TAppendValue>
+    {
+        this.WithResult(resultAppend);
+        return resultAppend.IsError || resultAppend.HasNoValue;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(true, nameof(Error))]
+    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(false)] out TAppendValue? value)
+        where TAppend : IResult<TAppendValue>
+    {
+        this.WithResult(resultAppend);
+        value = resultAppend.Value;
+        return resultAppend.IsError || resultAppend.HasNoValue;
+    }
+
     /// <summary>
     /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
@@ -110,19 +129,6 @@ public class Result<TValue> : Result, IResult<TValue>
     internal TValue? InternalValue;
 
     /// <inheritdoc/>
-    [JsonIgnore]
-    public override Error? Error => base.Error;
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(false, nameof(Error))]
-    public override bool IsSuccess => base.IsSuccess;
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
-    [JsonIgnore]
-    public override bool IsError => base.IsError;
-
-    /// <inheritdoc/>
     public virtual TValue? Value
     {
         get => InternalValue;
@@ -150,29 +156,6 @@ public class Result<TValue> : Result, IResult<TValue>
         {
             throw new EmptyResultException();
         }
-    }
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
-    public override bool AppendIsError<TAppend>(TAppend resultAppend) => base.AppendIsError(resultAppend);
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
-    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend)
-        where TAppend : IResult<TAppendValue>
-    {
-        this.WithResult(resultAppend);
-        return resultAppend.IsError || resultAppend.HasNoValue;
-    }
-
-    /// <inheritdoc/>
-    [MemberNotNullWhen(true, nameof(Error))]
-    public virtual bool AppendIsErrorOrHasNoValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(false)] out TAppendValue? value)
-        where TAppend : IResult<TAppendValue>
-    {
-        this.WithResult(resultAppend);
-        value = resultAppend.Value;
-        return resultAppend.IsError || resultAppend.HasNoValue;
     }
 
     /// <summary>
