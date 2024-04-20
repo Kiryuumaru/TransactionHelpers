@@ -17,4 +17,6 @@ public class Build : BaseNukeBuildHelpers
     internal readonly Solution Solution;
 
     public override string[] EnvironmentBranches { get; } = ["prerelease", "master"];
+
+    public override string MainEnvironmentBranch => "master";
 }
