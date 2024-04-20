@@ -65,6 +65,16 @@ public interface IResult
     /// Appends the specified result and checks if the appended result has an error or no value.
     /// </summary>
     /// <typeparam name="TAppend">The type of result to append.</typeparam>
+    /// <param name="resultAppend">The result to append.</param>
+    /// <returns>True if the appended result has an error, otherwise false.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool SuccessAndHasValue<TAppend>(TAppend resultAppend)
+        where TAppend : IResult;
+
+    /// <summary>
+    /// Appends the specified result and checks if the appended result has an error or no value.
+    /// </summary>
+    /// <typeparam name="TAppend">The type of result to append.</typeparam>
     /// <typeparam name="TAppendValue">The type of result value.</typeparam>
     /// <param name="resultAppend">The result to append.</param>
     /// <param name="value">The out result value.</param>

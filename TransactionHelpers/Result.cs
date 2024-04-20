@@ -51,12 +51,6 @@ public class Result : IResult
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
-        if (resultAppend.GetType().GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
-            hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
-        {
-            return !resultAppend.IsError && !hasNoValue;
-        }
-
         return !resultAppend.IsError;
     }
 
@@ -67,6 +61,21 @@ public class Result : IResult
     {
         this.WithResult(resultAppend);
         value = resultAppend.Value;
+        return !resultAppend.IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    public virtual bool SuccessAndHasValue<TAppend>(TAppend resultAppend)
+        where TAppend : IResult
+    {
+        this.WithResult(resultAppend);
+        if (resultAppend.GetType().GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
+            hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
+        {
+            return !resultAppend.IsError && !hasNoValue;
+        }
+
         return !resultAppend.IsError;
     }
 
