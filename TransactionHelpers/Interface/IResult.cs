@@ -119,4 +119,11 @@ public interface IResult<TValue> : IResult
     /// <exception cref="EmptyResultException">the <see cref="IResult{TValue}.Value"/> has no value.</exception>
     [MemberNotNull(nameof(Value))]
     void ThrowIfErrorOrHasNoValue();
+
+    /// <summary>
+    /// Get value or throws if the result has any _error or has no value.
+    /// </summary>
+    /// <exception cref="EmptyResultException">the <see cref="IResult{TValue}.Value"/> has no value.</exception>
+    [MemberNotNull(nameof(Value))]
+    TValue GetValueOrThrow();
 }

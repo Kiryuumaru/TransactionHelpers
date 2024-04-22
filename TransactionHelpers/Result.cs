@@ -174,6 +174,14 @@ public class Result<TValue> : Result, IResult<TValue>
         }
     }
 
+    /// <inheritdoc/>
+    [MemberNotNull(nameof(Value))]
+    public virtual TValue GetValueOrThrow()
+    {
+        ThrowIfErrorOrHasNoValue();
+        return Value;
+    }
+
     /// <summary>
     /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
