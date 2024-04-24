@@ -68,6 +68,33 @@ public static class ResultExtension
     }
 
     /// <summary>
+    /// Adds exceptions as errors to the specified result.
+    /// </summary>
+    /// <typeparam name="T">The type of result.</typeparam>
+    /// <param name="result">The result to which exceptions are added as errors.</param>
+    /// <param name="messages">An array of string message exceptions to add.</param>
+    /// <returns>The result with added errors.</returns>
+    public static T WithError<T>(this T result, params string?[]? messages)
+        where T : IResult
+    {
+        if (messages != null)
+        {
+            foreach (var message in messages)
+            {
+                if (string.IsNullOrEmpty(message))
+                {
+                    continue;
+                }
+                if (result is Result typedResult)
+                {
+                    typedResult.InternalError.Add(new Error() { Message = message });
+                }
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
     /// Incorporates the errors of the specified results into the current result.
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
