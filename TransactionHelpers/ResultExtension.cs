@@ -72,24 +72,44 @@ public static class ResultExtension
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
     /// <param name="result">The result to which exceptions are added as errors.</param>
-    /// <param name="messages">An array of string message exceptions to add.</param>
+    /// <param name="message">A string message exceptions to add.</param>
     /// <returns>The result with added errors.</returns>
-    public static T WithError<T>(this T result, params string?[]? messages)
+    public static T WithError<T>(this T result, string? message)
         where T : IResult
     {
-        if (messages != null)
+        if (string.IsNullOrEmpty(message))
         {
-            foreach (var message in messages)
+            return result;
+        }
+        if (result is Result typedResult)
+        {
+            typedResult.InternalError.Add(new Error() { Message = message });
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Adds exceptions as errors to the specified result.
+    /// </summary>
+    /// <typeparam name="T">The type of result.</typeparam>
+    /// <param name="result">The result to which exceptions are added as errors.</param>
+    /// <param name="errorCode">A string error code of the exceptions to add.</param>
+    /// <param name="message">A string message exceptions to add.</param>
+    /// <returns>The result with added errors.</returns>
+    public static T WithError<T>(this T result, string? errorCode, string? message)
+        where T : IResult
+    {
+        if (string.IsNullOrEmpty(errorCode) && string.IsNullOrEmpty(message))
+        {
+            return result;
+        }
+        if (result is Result typedResult)
+        {
+            typedResult.InternalError.Add(new Error()
             {
-                if (string.IsNullOrEmpty(message))
-                {
-                    continue;
-                }
-                if (result is Result typedResult)
-                {
-                    typedResult.InternalError.Add(new Error() { Message = message });
-                }
-            }
+                ErrorCode = errorCode,
+                Message = message
+            });
         }
         return result;
     }
