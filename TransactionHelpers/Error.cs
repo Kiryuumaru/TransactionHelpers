@@ -12,6 +12,7 @@ public class Error
 {
     private Exception? exception;
     private Exception? messageException;
+    private string? errorCode;
 
     /// <summary>
     /// Gets the <see cref="System.Exception"/> of the _error.
@@ -49,6 +50,21 @@ public class Error
         init
         {
             messageException = new Exception(value);
+        }
+    }
+
+    /// <summary>
+    /// Gets the error code of the _error.
+    /// </summary>
+    public string? ErrorCode
+    {
+        get
+        {
+            return errorCode;
+        }
+        init
+        {
+            errorCode = value;
         }
     }
 }
