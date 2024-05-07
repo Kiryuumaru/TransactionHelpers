@@ -119,9 +119,10 @@ public static class ResultExtension
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
     /// <param name="result">The result to which errors are incorporated.</param>
+    /// <param name="appendResultValues">Append values if the results has the same value type.</param>
     /// <param name="results">An array of nullable results to incorporate errors from.</param>
     /// <returns>The result with incorporated errors.</returns>
-    public static T WithResult<T>(this T result, params IResult?[]? results)
+    public static T WithResult<T>(this T result, bool appendResultValues, params IResult?[]? results)
         where T : IResult
     {
         if (results != null)
@@ -133,7 +134,8 @@ public static class ResultExtension
                     continue;
                 }
                 result.WithError(r.Errors.ToArray());
-                if (result.GetType().GetField(nameof(Result<object>.InternalValue), BindingFlags.NonPublic | BindingFlags.Instance) is FieldInfo resultValFieldInfo)
+                if (appendResultValues &&
+                    result.GetType().GetField(nameof(Result<object>.InternalValue), BindingFlags.NonPublic | BindingFlags.Instance) is FieldInfo resultValFieldInfo)
                 {
                     object? objToLook = r;
                     while (objToLook?.GetType().GetProperty(nameof(IResult<object>.Value)) is PropertyInfo propertyInfo)
@@ -148,6 +150,19 @@ public static class ResultExtension
             }
         }
         return result;
+    }
+
+    /// <summary>
+    /// Incorporates the errors of the specified results into the current result.
+    /// </summary>
+    /// <typeparam name="T">The type of result.</typeparam>
+    /// <param name="result">The result to which errors are incorporated.</param>
+    /// <param name="results">An array of nullable results to incorporate errors from.</param>
+    /// <returns>The result with incorporated errors.</returns>
+    public static T WithResult<T>(this T result, params IResult?[]? results)
+        where T : IResult
+    {
+        return WithResult(result, true, results);
     }
 
     /// <summary>

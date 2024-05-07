@@ -47,10 +47,29 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
+    public bool Success<TAppend>(TAppend resultAppend, bool appendResultValues)
+        where TAppend : IResult
+    {
+        this.WithResult(appendResultValues, resultAppend);
+        return !resultAppend.IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
     public virtual bool Success<TAppend>(TAppend resultAppend)
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
+        return !resultAppend.IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    public bool Success<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
+        where TAppend : IResult<TAppendValue>
+    {
+        this.WithResult(appendResultValues, resultAppend);
+        value = resultAppend.Value;
         return !resultAppend.IsError;
     }
 
@@ -61,6 +80,21 @@ public class Result : IResult
     {
         this.WithResult(resultAppend);
         value = resultAppend.Value;
+        return !resultAppend.IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    public bool SuccessAndHasValue<TAppend>(TAppend resultAppend, bool appendResultValues)
+        where TAppend : IResult
+    {
+        this.WithResult(appendResultValues, resultAppend);
+        if (resultAppend.GetType().GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
+            hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
+        {
+            return !resultAppend.IsError && !hasNoValue;
+        }
+
         return !resultAppend.IsError;
     }
 
@@ -77,6 +111,16 @@ public class Result : IResult
         }
 
         return !resultAppend.IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    public bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
+        where TAppend : IResult<TAppendValue>
+    {
+        this.WithResult(appendResultValues, resultAppend);
+        value = resultAppend.Value;
+        return !resultAppend.IsError && !resultAppend.HasNoValue;
     }
 
     /// <inheritdoc/>

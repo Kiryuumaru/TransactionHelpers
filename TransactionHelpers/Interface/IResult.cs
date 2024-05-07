@@ -44,10 +44,34 @@ public interface IResult
     /// </summary>
     /// <typeparam name="TAppend">The type of result to append.</typeparam>
     /// <param name="resultAppend">The result to append.</param>
+    /// <param name="appendResultValues">Append values if the results has the same value type.</param>
+    /// <returns>True if the appended result has an error, otherwise false.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool Success<TAppend>(TAppend resultAppend, bool appendResultValues)
+        where TAppend : IResult;
+
+    /// <summary>
+    /// Appends the specified result and checks if the appended result has an error.
+    /// </summary>
+    /// <typeparam name="TAppend">The type of result to append.</typeparam>
+    /// <param name="resultAppend">The result to append.</param>
     /// <returns>True if the appended result has an error, otherwise false.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
     bool Success<TAppend>(TAppend resultAppend)
         where TAppend : IResult;
+
+    /// <summary>
+    /// Appends the specified result and checks if the appended result has an error.
+    /// </summary>
+    /// <typeparam name="TAppend">The type of result to append.</typeparam>
+    /// <typeparam name="TAppendValue">The type of result value.</typeparam>
+    /// <param name="resultAppend">The result to append.</param>
+    /// <param name="appendResultValues">Append values if the results has the same value type.</param>
+    /// <param name="value">The out result value.</param>
+    /// <returns>false if the appended result has an error or no value, otherwise true.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool Success<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
+        where TAppend : IResult<TAppendValue>;
 
     /// <summary>
     /// Appends the specified result and checks if the appended result has an error.
@@ -66,10 +90,34 @@ public interface IResult
     /// </summary>
     /// <typeparam name="TAppend">The type of result to append.</typeparam>
     /// <param name="resultAppend">The result to append.</param>
+    /// <param name="appendResultValues">Append values if the results has the same value type.</param>
+    /// <returns>True if the appended result has an error, otherwise false.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool SuccessAndHasValue<TAppend>(TAppend resultAppend, bool appendResultValues)
+        where TAppend : IResult;
+
+    /// <summary>
+    /// Appends the specified result and checks if the appended result has an error or no value.
+    /// </summary>
+    /// <typeparam name="TAppend">The type of result to append.</typeparam>
+    /// <param name="resultAppend">The result to append.</param>
     /// <returns>True if the appended result has an error, otherwise false.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
     bool SuccessAndHasValue<TAppend>(TAppend resultAppend)
         where TAppend : IResult;
+
+    /// <summary>
+    /// Appends the specified result and checks if the appended result has an error or no value.
+    /// </summary>
+    /// <typeparam name="TAppend">The type of result to append.</typeparam>
+    /// <typeparam name="TAppendValue">The type of result value.</typeparam>
+    /// <param name="resultAppend">The result to append.</param>
+    /// <param name="appendResultValues">Append values if the results has the same value type.</param>
+    /// <param name="value">The out result value.</param>
+    /// <returns>false if the appended result has an error or no value, otherwise true.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
+        where TAppend : IResult<TAppendValue>;
 
     /// <summary>
     /// Appends the specified result and checks if the appended result has an error or no value.
