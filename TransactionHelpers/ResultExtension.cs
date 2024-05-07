@@ -167,4 +167,21 @@ public static class ResultExtension
         }
         return result;
     }
+
+    /// <summary>
+    /// Sets the value of the result to empty.
+    /// </summary>
+    /// <typeparam name="T">The type of result.</typeparam>
+    /// <typeparam name="TValue">The type of value.</typeparam>
+    /// <param name="result">The result to which the value is set.</param>
+    /// <returns>The result with the value set.</returns>
+    public static T WithEmptyValue<T, TValue>(this T result)
+        where T : IResult<TValue>
+    {
+        if (result is Result<TValue> typedResult)
+        {
+            typedResult.InternalValue = default;
+        }
+        return result;
+    }
 }
