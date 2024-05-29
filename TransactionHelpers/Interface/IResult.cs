@@ -40,6 +40,20 @@ public interface IResult
     void ThrowIfError();
 
     /// <summary>
+    /// Checks if the result has an error.
+    /// </summary>
+    /// <returns>True if the result has an error, otherwise false.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool Success();
+
+    /// <summary>
+    /// Checks if the result has an error or no value.
+    /// </summary>
+    /// <returns>True if the result has an error, otherwise false.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool SuccessAndHasValue();
+
+    /// <summary>
     /// Appends the specified result and checks if the appended result has an error.
     /// </summary>
     /// <typeparam name="TAppend">The type of result to append.</typeparam>
@@ -174,4 +188,29 @@ public interface IResult<TValue> : IResult
     /// <exception cref="EmptyResultException">the <see cref="IResult{TValue}.Value"/> has no value.</exception>
     [MemberNotNull(nameof(Value))]
     TValue GetValueOrThrow();
+
+    /// <summary>
+    /// Checks if the result has an error.
+    /// </summary>
+    /// <param name="value">The out result value.</param>
+    /// <returns>false if the result has an error or no value, otherwise true.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    bool Success(out TValue? value);
+
+    /// <summary>
+    /// Checks if the result has an error or no value.
+    /// </summary>
+    /// <returns>True if the result has an error, otherwise false.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    [MemberNotNullWhen(true, nameof(Value))]
+    new bool SuccessAndHasValue();
+
+    /// <summary>
+    /// Checks if the result has an error.
+    /// </summary>
+    /// <param name="value">The out result value.</param>
+    /// <returns>false if the result has an error or no value, otherwise true.</returns>
+    [MemberNotNullWhen(false, nameof(Error))]
+    [MemberNotNullWhen(true, nameof(Value))]
+    bool SuccessAndHasValue([NotNullWhen(true)] out TValue? value);
 }
