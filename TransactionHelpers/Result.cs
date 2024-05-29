@@ -47,6 +47,20 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
+    public bool Success()
+    {
+        return !IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    public bool SuccessAndHasValue()
+    {
+        return !IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
     public bool Success<TAppend>(TAppend resultAppend, bool appendResultValues)
         where TAppend : IResult
     {
@@ -189,6 +203,17 @@ public class Result<TValue> : Result, IResult<TValue>
     internal TValue? InternalValue;
 
     /// <inheritdoc/>
+    [JsonIgnore]
+    public override Error? Error => base.Error;
+
+    /// <inheritdoc/>
+    public override IReadOnlyList<Error> Errors
+    {
+        get => base.Errors;
+        init => base.Errors = value.ToList();
+    }
+
+    /// <inheritdoc/>
     public virtual TValue? Value
     {
         get => InternalValue;
@@ -224,6 +249,24 @@ public class Result<TValue> : Result, IResult<TValue>
     {
         ThrowIfErrorOrHasNoValue();
         return Value;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    [MemberNotNullWhen(true, nameof(Value))]
+    public bool Success(out TValue? value)
+    {
+        value = Value;
+        return !IsError;
+    }
+
+    /// <inheritdoc/>
+    [MemberNotNullWhen(false, nameof(Error))]
+    [MemberNotNullWhen(true, nameof(Value))]
+    public bool SuccessAndHasValue([NotNullWhen(true)] out TValue? value)
+    {
+        value = Value;
+        return !IsError && !HasNoValue;
     }
 
     /// <summary>
