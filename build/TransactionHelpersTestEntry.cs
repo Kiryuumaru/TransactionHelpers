@@ -21,11 +21,11 @@ public class TransactionHelpersTestEntry : AppTestEntry<Build>
 
     public override void Run(AppTestRunContext appTestContext)
     {
-        var projPath = RootDirectory / "TransactionHelpers.UnitTest" / "TransactionHelpers.UnitTest.csproj";
+        var projectPath = RootDirectory / "TransactionHelpers.UnitTest" / "TransactionHelpers.UnitTest.csproj";
 
         DotNetTasks.DotNetClean(_ => _
-            .SetProject(projPath));
+            .SetProject(projectPath));
         DotNetTasks.DotNetTest(_ => _
-            .SetProjectFile(projPath));
+            .SetProjectFile(projectPath));
     }
 }
