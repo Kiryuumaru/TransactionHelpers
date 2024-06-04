@@ -19,6 +19,8 @@ public class TransactionHelpersEntry : AppEntry<Build>
 
     public override RunsOnType PublishRunsOn => RunsOnType.Ubuntu2204;
 
+    public override RunType RunBuildOn => RunType.All;
+
     [SecretVariable("NUGET_AUTH_TOKEN")]
     readonly string NuGetAuthToken;
 
@@ -29,25 +31,30 @@ public class TransactionHelpersEntry : AppEntry<Build>
 
     public override void Build(AppRunContext appRunContext)
     {
+        var projPath = RootDirectory / "TransactionHelpers" / "TransactionHelpers.csproj";
+        var version = "0.0.0";
+        var releaseNotes = "";
         if (appRunContext is AppBumpRunContext appBumpRunContext)
         {
-            OutputDirectory.DeleteDirectory();
-            DotNetTasks.DotNetClean(_ => _
-                .SetProject(NukeBuild.Solution.TransactionHelpers));
-            DotNetTasks.DotNetBuild(_ => _
-                .SetProjectFile(NukeBuild.Solution.TransactionHelpers)
-                .SetConfiguration("Release"));
-            DotNetTasks.DotNetPack(_ => _
-                .SetProject(NukeBuild.Solution.TransactionHelpers)
-                .SetConfiguration("Release")
-                .SetNoRestore(true)
-                .SetNoBuild(true)
-                .SetIncludeSymbols(true)
-                .SetSymbolPackageFormat("snupkg")
-                .SetVersion(appBumpRunContext.AppVersion.Version?.ToString() ?? "0.0.0")
-                .SetPackageReleaseNotes(appBumpRunContext.AppVersion.ReleaseNotes)
-                .SetOutputDirectory(OutputDirectory));
+            version = appBumpRunContext.AppVersion.Version.ToString();
+            releaseNotes = appBumpRunContext.AppVersion.ReleaseNotes;
         }
+
+        DotNetTasks.DotNetClean(_ => _
+            .SetProject(projPath));
+        DotNetTasks.DotNetBuild(_ => _
+            .SetProjectFile(projPath)
+            .SetConfiguration("Release"));
+        DotNetTasks.DotNetPack(_ => _
+            .SetProject(projPath)
+            .SetConfiguration("Release")
+            .SetNoRestore(true)
+            .SetNoBuild(true)
+            .SetIncludeSymbols(true)
+            .SetSymbolPackageFormat("snupkg")
+            .SetVersion(version)
+            .SetPackageReleaseNotes(releaseNotes)
+            .SetOutputDirectory(OutputDirectory));
     }
 
     public override void Publish(AppRunContext appRunContext)

@@ -17,15 +17,15 @@ public class TransactionHelpersTestEntry : AppTestEntry<Build>
 {
     public override RunsOnType RunsOn => RunsOnType.Ubuntu2204;
 
-    public override RunTestType RunTestOn => RunTestType.All;
-
     public override Type[] AppEntryTargets => [typeof(TransactionHelpersEntry)];
 
     public override void Run(AppTestRunContext appTestContext)
     {
+        var projPath = RootDirectory / "TransactionHelpers.UnitTest" / "TransactionHelpers.UnitTest.csproj";
+
         DotNetTasks.DotNetClean(_ => _
-            .SetProject(NukeBuild.Solution.TransactionHelpers_UnitTest));
+            .SetProject(projPath));
         DotNetTasks.DotNetTest(_ => _
-            .SetProjectFile(NukeBuild.Solution.TransactionHelpers_UnitTest));
+            .SetProjectFile(projPath));
     }
 }
