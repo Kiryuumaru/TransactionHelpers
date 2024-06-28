@@ -3,7 +3,6 @@
 on:
   push:
     branches:
-    - prerelease
     - master
     tags-ignore:
     - bump-*
@@ -11,7 +10,6 @@ on:
 concurrency: "dependabot-auto-bump"
 
 permissions:
-  pull-requests: write
   contents: write
 
 jobs:
