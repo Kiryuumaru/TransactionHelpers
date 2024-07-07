@@ -122,7 +122,7 @@ jobs:
     needs:
     - PRE_SETUP
     - TRANSACTIONHELPERSBUILD
-    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CONDITION == 'true' && needs.TRANSACTIONHELPERSTEST.result == 'success'"
+    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CONDITION == 'true' && needs.TRANSACTIONHELPERSTEST.result != 'failure' && needs.TRANSACTIONHELPERSBUILD.result != 'failure'"
     env:
       NUKE_PRE_SETUP: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP }}
   POST_SETUP:
