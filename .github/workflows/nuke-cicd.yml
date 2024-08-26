@@ -23,6 +23,7 @@ jobs:
         fetch-depth: 0
         fetch-tags: true
         submodules: recursive
+        persist-credentials: true
     - id: NUKE_RUN
       name: Run Nuke PipelinePreSetup
       run: chmod +x ./build.sh && ./build.sh PipelinePreSetup
@@ -61,31 +62,6 @@ jobs:
       NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_FETCH_DEPTH: ${{ steps.NUKE_RUN.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_FETCH_DEPTH }}
       NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_FETCH_TAGS: ${{ steps.NUKE_RUN.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_FETCH_TAGS }}
       NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_SUBMODULES: ${{ steps.NUKE_RUN.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_SUBMODULES }}
-  TRANSACTIONHELPERSTEST:
-    name: Test - transaction_helpers (TransactionHelpersTest)
-    runs-on: ${{ fromJson(needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_RUNS_ON) }}
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CHECKOUT_FETCH_DEPTH }}
-        fetch-tags: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CHECKOUT_FETCH_TAGS }}
-        submodules: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CHECKOUT_SUBMODULES }}
-    - name: Cache Run
-      uses: actions/cache@v4
-      with:
-        path: ./.nuke/temp/cache
-        key: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CACHE_KEY }}
-        restore-keys: |-
-          ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CACHE_RESTORE_KEY }}
-          ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CACHE_MAIN_RESTORE_KEY }}
-    - id: NUKE_RUN
-      name: Run Nuke PipelineRunEntry
-      run: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_RUN_SCRIPT }} PipelineRunEntry --args "run=test;idsToRun=TransactionHelpersTest"
-    needs:
-    - PRE_SETUP
-    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CONDITION == 'true'"
-    env:
-      NUKE_PRE_SETUP: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP }}
   TRANSACTIONHELPERSBUILD:
     name: Build - transaction_helpers (TransactionHelpersBuild)
     runs-on: ${{ fromJson(needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSBUILD_RUNS_ON) }}
@@ -95,6 +71,7 @@ jobs:
         fetch-depth: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSBUILD_CHECKOUT_FETCH_DEPTH }}
         fetch-tags: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSBUILD_CHECKOUT_FETCH_TAGS }}
         submodules: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSBUILD_CHECKOUT_SUBMODULES }}
+        persist-credentials: true
     - name: Cache Run
       uses: actions/cache@v4
       with:
@@ -115,8 +92,38 @@ jobs:
         retention-days: 1
     needs:
     - PRE_SETUP
-    - TRANSACTIONHELPERSTEST
-    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSBUILD_CONDITION == 'true' && needs.TRANSACTIONHELPERSTEST.result == 'success'"
+    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSBUILD_CONDITION == 'true'"
+    env:
+      NUKE_PRE_SETUP: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP }}
+  TRANSACTIONHELPERSTEST:
+    name: Test - transaction_helpers (TransactionHelpersTest)
+    runs-on: ${{ fromJson(needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_RUNS_ON) }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CHECKOUT_FETCH_DEPTH }}
+        fetch-tags: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CHECKOUT_FETCH_TAGS }}
+        submodules: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CHECKOUT_SUBMODULES }}
+        persist-credentials: true
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./.nuke/temp/artifacts-download
+    - name: Cache Run
+      uses: actions/cache@v4
+      with:
+        path: ./.nuke/temp/cache
+        key: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CACHE_KEY }}
+        restore-keys: |-
+          ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CACHE_RESTORE_KEY }}
+          ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CACHE_MAIN_RESTORE_KEY }}
+    - id: NUKE_RUN
+      name: Run Nuke PipelineRunEntry
+      run: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_RUN_SCRIPT }} PipelineRunEntry --args "run=test;idsToRun=TransactionHelpersTest"
+    needs:
+    - PRE_SETUP
+    - TRANSACTIONHELPERSBUILD
+    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSTEST_CONDITION == 'true' && needs.TRANSACTIONHELPERSBUILD.result == 'success'"
     env:
       NUKE_PRE_SETUP: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP }}
   TRANSACTIONHELPERSPUBLISH:
@@ -128,6 +135,7 @@ jobs:
         fetch-depth: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_FETCH_DEPTH }}
         fetch-tags: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_FETCH_TAGS }}
         submodules: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CHECKOUT_SUBMODULES }}
+        persist-credentials: true
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
@@ -147,7 +155,8 @@ jobs:
     needs:
     - PRE_SETUP
     - TRANSACTIONHELPERSBUILD
-    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CONDITION == 'true' && needs.TRANSACTIONHELPERSTEST.result != 'failure' && needs.TRANSACTIONHELPERSBUILD.result != 'failure'"
+    - TRANSACTIONHELPERSTEST
+    if: "! failure() && ! cancelled() && needs.PRE_SETUP.outputs.NUKE_PRE_SETUP_TRANSACTIONHELPERSPUBLISH_CONDITION == 'true' && needs.TRANSACTIONHELPERSBUILD.result == 'success' && needs.TRANSACTIONHELPERSTEST.result == 'success'"
     env:
       NUKE_PRE_SETUP: ${{ needs.PRE_SETUP.outputs.NUKE_PRE_SETUP }}
   POST_SETUP:
@@ -160,6 +169,7 @@ jobs:
         fetch-depth: 0
         fetch-tags: true
         submodules: recursive
+        persist-credentials: true
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
@@ -170,8 +180,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     needs:
     - PRE_SETUP
-    - TRANSACTIONHELPERSTEST
     - TRANSACTIONHELPERSBUILD
+    - TRANSACTIONHELPERSTEST
     - TRANSACTIONHELPERSPUBLISH
     if: success() || failure() || always()
     timeout-minutes: 10
