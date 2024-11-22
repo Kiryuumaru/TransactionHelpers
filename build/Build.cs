@@ -25,12 +25,12 @@ public class Build : BaseNukeBuildHelpers
     public override string MainEnvironmentBranch => "master";
 
     [SecretVariable("NUGET_AUTH_TOKEN")]
-    readonly string NuGetAuthToken;
+    readonly string? NuGetAuthToken;
 
     [SecretVariable("GITHUB_TOKEN")]
-    readonly string GithubToken;
+    readonly string? GithubToken;
 
-    TestEntry TransactionHelpersTest => _ => _
+    public TestEntry TransactionHelpersTest => _ => _
         .AppId("transaction_helpers")
         .RunnerOS(RunnerOS.Ubuntu2204)
         .Execute(context =>
@@ -43,7 +43,7 @@ public class Build : BaseNukeBuildHelpers
                 .SetProjectFile(projectPath));
         });
 
-    BuildEntry TransactionHelpersBuild => _ => _
+    public BuildEntry TransactionHelpersBuild => _ => _
         .AppId("transaction_helpers")
         .RunnerOS(RunnerOS.Ubuntu2204)
         .Execute(context =>
@@ -73,7 +73,7 @@ public class Build : BaseNukeBuildHelpers
                 .SetOutputDirectory(OutputDirectory));
         });
 
-    PublishEntry TransactionHelpersPublish => _ => _
+    public PublishEntry TransactionHelpersPublish => _ => _
         .AppId("transaction_helpers")
         .RunnerOS(RunnerOS.Ubuntu2204)
         .ReleaseCommonAsset(OutputDirectory)
