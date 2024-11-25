@@ -1,40 +1,40 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <LangVersion>11</LangVersion>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<LangVersion>13</LangVersion>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <Title>TransactionHelpers</Title>
-    <Authors>Kiryuumaru</Authors>
-    <Company>Kiryuumaru</Company>
-    <Copyright>Kiryuumaru</Copyright>
-    <Description>Transaction helpers.</Description>
-    <PackageTags>Transaction helpers</PackageTags>
-    <PackageProjectUrl>https://github.com/Kiryuumaru/TransactionHelpers</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Kiryuumaru/TransactionHelpers</RepositoryUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Title>TransactionHelpers</Title>
+		<Authors>Kiryuumaru</Authors>
+		<Company>Kiryuumaru</Company>
+		<Copyright>Kiryuumaru</Copyright>
+		<Description>Transaction helpers.</Description>
+		<PackageTags>Transaction helpers</PackageTags>
+		<PackageProjectUrl>https://github.com/Kiryuumaru/TransactionHelpers</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Kiryuumaru/TransactionHelpers</RepositoryUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\LICENSE" Pack="true" PackagePath="" />
-    <None Include="..\README.md" Pack="true" PackagePath="" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\LICENSE" Pack="true" PackagePath="" />
+		<None Include="..\README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+		<PackageReference Include="System.Text.Json" Version="9.0.0" />
+	</ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'">
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <IsTrimmable>true</IsTrimmable>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0'">
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<IsTrimmable>true</IsTrimmable>
+	</PropertyGroup>
 
 </Project>

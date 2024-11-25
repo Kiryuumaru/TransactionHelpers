@@ -61,7 +61,7 @@ public interface IResult
     /// <param name="appendResultValues">Append values if the results has the same value type.</param>
     /// <returns>True if the appended result has an error, otherwise false.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool Success<TAppend>(TAppend resultAppend, bool appendResultValues)
+    bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend, bool appendResultValues)
         where TAppend : IResult;
 
     /// <summary>
@@ -71,7 +71,7 @@ public interface IResult
     /// <param name="resultAppend">The result to append.</param>
     /// <returns>True if the appended result has an error, otherwise false.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool Success<TAppend>(TAppend resultAppend)
+    bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend)
         where TAppend : IResult;
 
     /// <summary>
@@ -84,7 +84,7 @@ public interface IResult
     /// <param name="value">The out result value.</param>
     /// <returns>false if the appended result has an error or no value, otherwise true.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool Success<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
+    bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
         where TAppend : IResult<TAppendValue>;
 
     /// <summary>
@@ -96,7 +96,7 @@ public interface IResult
     /// <param name="value">The out result value.</param>
     /// <returns>false if the appended result has an error or no value, otherwise true.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool Success<TAppend, TAppendValue>(TAppend resultAppend, out TAppendValue? value)
+    bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, out TAppendValue? value)
         where TAppend : IResult<TAppendValue>;
 
     /// <summary>
@@ -107,7 +107,7 @@ public interface IResult
     /// <param name="appendResultValues">Append values if the results has the same value type.</param>
     /// <returns>True if the appended result has an error, otherwise false.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool SuccessAndHasValue<TAppend>(TAppend resultAppend, bool appendResultValues)
+    bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend, bool appendResultValues)
         where TAppend : IResult;
 
     /// <summary>
@@ -117,7 +117,7 @@ public interface IResult
     /// <param name="resultAppend">The result to append.</param>
     /// <returns>True if the appended result has an error, otherwise false.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool SuccessAndHasValue<TAppend>(TAppend resultAppend)
+    bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend)
         where TAppend : IResult;
 
     /// <summary>
@@ -130,7 +130,7 @@ public interface IResult
     /// <param name="value">The out result value.</param>
     /// <returns>false if the appended result has an error or no value, otherwise true.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
+    bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>;
 
     /// <summary>
@@ -142,7 +142,7 @@ public interface IResult
     /// <param name="value">The out result value.</param>
     /// <returns>false if the appended result has an error or no value, otherwise true.</returns>
     [MemberNotNullWhen(false, nameof(Error))]
-    bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
+    bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>;
 }
 

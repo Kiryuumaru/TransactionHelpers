@@ -14,7 +14,7 @@ namespace TransactionHelpers;
 /// </summary>
 public class Result : IResult
 {
-    internal readonly List<Error> InternalError = new();
+    internal readonly List<Error> InternalError = [];
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -24,7 +24,7 @@ public class Result : IResult
     public virtual IReadOnlyList<Error> Errors
     {
         get => InternalError.AsReadOnly();
-        init => InternalError = value.ToList();
+        init => InternalError = [.. value];
     }
 
     /// <inheritdoc/>
@@ -61,7 +61,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool Success<TAppend>(TAppend resultAppend, bool appendResultValues)
+    public bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend, bool appendResultValues)
         where TAppend : IResult
     {
         this.WithResult(appendResultValues, resultAppend);
@@ -70,7 +70,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool Success<TAppend>(TAppend resultAppend)
+    public virtual bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend)
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
@@ -79,7 +79,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool Success<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
+    public bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(appendResultValues, resultAppend);
@@ -89,7 +89,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool Success<TAppend, TAppendValue>(TAppend resultAppend, out TAppendValue? value)
+    public virtual bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(resultAppend);
@@ -99,11 +99,11 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool SuccessAndHasValue<TAppend>(TAppend resultAppend, bool appendResultValues)
+    public bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend, bool appendResultValues)
         where TAppend : IResult
     {
         this.WithResult(appendResultValues, resultAppend);
-        if (resultAppend.GetType().GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
+        if (typeof(TAppend).GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
             hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
         {
             return !resultAppend.IsError && !hasNoValue;
@@ -114,11 +114,11 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool SuccessAndHasValue<TAppend>(TAppend resultAppend)
+    public virtual bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend)
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
-        if (resultAppend.GetType().GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
+        if (typeof(TAppend).GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
             hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
         {
             return !resultAppend.IsError && !hasNoValue;
@@ -129,7 +129,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
+    public bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(appendResultValues, resultAppend);
@@ -139,7 +139,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
+    public virtual bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(resultAppend);
@@ -210,7 +210,7 @@ public class Result<TValue> : Result, IResult<TValue>
     public override IReadOnlyList<Error> Errors
     {
         get => base.Errors;
-        init => base.Errors = value.ToList();
+        init => base.Errors = [.. value];
     }
 
     /// <inheritdoc/>
