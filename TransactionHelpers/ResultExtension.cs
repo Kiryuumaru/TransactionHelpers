@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using TransactionHelpers.Interface;
@@ -118,34 +119,32 @@ public static class ResultExtension
     /// Incorporates the errors of the specified results into the current result.
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
+    /// <typeparam name="TResult">The type of result.</typeparam>
     /// <param name="result">The result to which errors are incorporated.</param>
     /// <param name="appendResultValues">Append values if the results has the same value type.</param>
-    /// <param name="results">An array of nullable results to incorporate errors from.</param>
+    /// <param name="resultToAppend">A result to incorporate errors from.</param>
     /// <returns>The result with incorporated errors.</returns>
-    public static T WithResult<T>(this T result, bool appendResultValues, params IResult?[]? results)
+    public static T WithResult<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResult>(this T result, bool appendResultValues, TResult? resultToAppend)
         where T : IResult
+        where TResult : IResult
     {
-        if (results != null)
+        if (resultToAppend == null)
         {
-            foreach (var r in results)
+            return result;
+        }
+        result.WithError(resultToAppend.Errors.ToArray());
+        if (appendResultValues &&
+            typeof(T).GetField(nameof(Result<object>.InternalValue), BindingFlags.NonPublic | BindingFlags.Instance) is FieldInfo resultValFieldInfo)
+        {
+            object? objToLook = resultToAppend;
+#pragma warning disable IL2075
+            while (objToLook?.GetType().GetProperty(nameof(IResult<object>.Value)) is PropertyInfo propertyInfo)
+#pragma warning restore IL2075
             {
-                if (r == null)
+                objToLook = propertyInfo.GetValue(objToLook);
+                if (resultValFieldInfo.FieldType.IsAssignableFrom(propertyInfo.PropertyType))
                 {
-                    continue;
-                }
-                result.WithError(r.Errors.ToArray());
-                if (appendResultValues &&
-                    result.GetType().GetField(nameof(Result<object>.InternalValue), BindingFlags.NonPublic | BindingFlags.Instance) is FieldInfo resultValFieldInfo)
-                {
-                    object? objToLook = r;
-                    while (objToLook?.GetType().GetProperty(nameof(IResult<object>.Value)) is PropertyInfo propertyInfo)
-                    {
-                        objToLook = propertyInfo.GetValue(objToLook);
-                        if (resultValFieldInfo.FieldType.IsAssignableFrom(propertyInfo.PropertyType))
-                        {
-                            resultValFieldInfo.SetValue(result, objToLook);
-                        }
-                    }
+                    resultValFieldInfo.SetValue(result, objToLook);
                 }
             }
         }
@@ -156,13 +155,15 @@ public static class ResultExtension
     /// Incorporates the errors of the specified results into the current result.
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
+    /// <typeparam name="TResult">The type of result.</typeparam>
     /// <param name="result">The result to which errors are incorporated.</param>
-    /// <param name="results">An array of nullable results to incorporate errors from.</param>
+    /// <param name="resultToAppend">A results to incorporate errors from.</param>
     /// <returns>The result with incorporated errors.</returns>
-    public static T WithResult<T>(this T result, params IResult?[]? results)
+    public static T WithResult<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResult>(this T result, TResult? resultToAppend)
         where T : IResult
+        where TResult : IResult
     {
-        return WithResult(result, true, results);
+        return WithResult(result, true, resultToAppend);
     }
 
     /// <summary>
