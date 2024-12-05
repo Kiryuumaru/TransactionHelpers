@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 using TransactionHelpers.Interface;
 using TransactionHelpers.Exceptions;
 using System.Collections.Generic;
+using System.Text.Json.Serialization.Metadata;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace TransactionHelpers;
 
@@ -14,7 +17,7 @@ namespace TransactionHelpers;
 /// </summary>
 public class Result : IResult
 {
-    internal readonly List<Error> InternalError = [];
+    internal List<Error> InternalError = [];
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -24,7 +27,7 @@ public class Result : IResult
     public virtual IReadOnlyList<Error> Errors
     {
         get => InternalError.AsReadOnly();
-        init => InternalError = [.. value];
+        set => InternalError = [.. value];
     }
 
     /// <inheritdoc/>
@@ -210,14 +213,14 @@ public class Result<TValue> : Result, IResult<TValue>
     public override IReadOnlyList<Error> Errors
     {
         get => base.Errors;
-        init => base.Errors = [.. value];
+        set => base.Errors = [.. value];
     }
 
     /// <inheritdoc/>
     public virtual TValue? Value
     {
         get => InternalValue;
-        init => InternalValue = value;
+        set => InternalValue = value;
     }
 
     /// <inheritdoc/>
@@ -239,7 +242,7 @@ public class Result<TValue> : Result, IResult<TValue>
         }
         else if (HasNoValue)
         {
-            throw new EmptyResultException();
+            throw EmptyResultException.Default;
         }
     }
 
