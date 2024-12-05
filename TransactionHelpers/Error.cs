@@ -28,7 +28,7 @@ public class Error
             }
             return exception;
         }
-        init
+        set
         {
             exception = value;
         }
@@ -47,7 +47,7 @@ public class Error
             }
             return messageException?.Message;
         }
-        init
+        set
         {
             messageException = new Exception(value);
         }
@@ -62,7 +62,7 @@ public class Error
         {
             return errorCode;
         }
-        init
+        set
         {
             errorCode = value;
         }
