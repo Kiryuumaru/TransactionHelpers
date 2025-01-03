@@ -68,7 +68,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend, bool appendResultValues)
+    public bool Success<TAppend>(TAppend resultAppend, bool appendResultValues)
         where TAppend : IResult
     {
         this.WithResult(appendResultValues, resultAppend);
@@ -77,7 +77,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend)
+    public virtual bool Success<TAppend>(TAppend resultAppend)
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
@@ -86,7 +86,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
+    public bool Success<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(appendResultValues, resultAppend);
@@ -96,7 +96,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool Success<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, out TAppendValue? value)
+    public virtual bool Success<TAppend, TAppendValue>(TAppend resultAppend, out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(resultAppend);
@@ -106,14 +106,14 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend, bool appendResultValues)
+    public bool SuccessAndHasValue<TAppend>(TAppend resultAppend, bool appendResultValues)
         where TAppend : IResult
     {
         this.WithResult(appendResultValues, resultAppend);
-        if (typeof(TAppend).GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
-            hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
+
+        if (resultAppend.InternalValueType != null)
         {
-            return !resultAppend.IsError && !hasNoValue;
+            return !resultAppend.IsError && resultAppend.InternalValue != null;
         }
 
         return !resultAppend.IsError;
@@ -121,14 +121,14 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend>(TAppend resultAppend)
+    public virtual bool SuccessAndHasValue<TAppend>(TAppend resultAppend)
         where TAppend : IResult
     {
         this.WithResult(resultAppend);
-        if (typeof(TAppend).GetProperty(nameof(IResult<object>.HasNoValue), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) is PropertyInfo hasNoValuePropertyInfo &&
-            hasNoValuePropertyInfo.GetValue(resultAppend) is bool hasNoValue)
+
+        if (resultAppend.InternalValueType != null)
         {
-            return !resultAppend.IsError && !hasNoValue;
+            return !resultAppend.IsError && resultAppend.InternalValue != null;
         }
 
         return !resultAppend.IsError;
@@ -136,7 +136,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
+    public bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, bool appendResultValues, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(appendResultValues, resultAppend);
@@ -146,7 +146,7 @@ public class Result : IResult
 
     /// <inheritdoc/>
     [MemberNotNullWhen(false, nameof(Error))]
-    public virtual bool SuccessAndHasValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
+    public virtual bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>
     {
         this.WithResult(resultAppend);
