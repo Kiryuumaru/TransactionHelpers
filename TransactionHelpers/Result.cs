@@ -17,17 +17,21 @@ namespace TransactionHelpers;
 /// </summary>
 public class Result : IResult
 {
-    internal List<Error> InternalError = [];
+    List<Error> IResult.InternalErrors { get; set; } = [];
+
+    object? IResult.InternalValue { get; set; }
+
+    Type? IResult.InternalValueType { get; set; }
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public virtual Error? Error => InternalError.LastOrDefault();
+    public virtual Error? Error => (this as IResult).InternalErrors.LastOrDefault();
 
     /// <inheritdoc/>
     public virtual IReadOnlyList<Error> Errors
     {
-        get => InternalError.AsReadOnly();
-        set => InternalError = [.. value];
+        get => (this as IResult).InternalErrors.AsReadOnly();
+        set => (this as IResult).InternalErrors = [.. value];
     }
 
     /// <inheritdoc/>
@@ -203,7 +207,13 @@ public class Result : IResult
 /// </typeparam>
 public class Result<TValue> : Result, IResult<TValue>
 {
-    internal TValue? InternalValue;
+    /// <summary>
+    /// Creates a new instance of <see cref="Result{TValue}"/>.
+    /// </summary>
+    public Result()
+    {
+        (this as IResult).InternalValueType = typeof(TValue);
+    }
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -219,8 +229,8 @@ public class Result<TValue> : Result, IResult<TValue>
     /// <inheritdoc/>
     public virtual TValue? Value
     {
-        get => InternalValue;
-        set => InternalValue = value;
+        get => (TValue?)(this as IResult).InternalValue;
+        set => (this as IResult).InternalValue = value;
     }
 
     /// <inheritdoc/>
