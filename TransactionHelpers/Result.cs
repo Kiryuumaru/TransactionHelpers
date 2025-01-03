@@ -230,7 +230,7 @@ public class Result<TValue> : Result, IResult<TValue>
     public virtual TValue? Value
     {
         get => (TValue?)(this as IResult).InternalValue;
-        set => (this as IResult).InternalValue = value;
+        set => this.WithValue(value);
     }
 
     /// <inheritdoc/>
