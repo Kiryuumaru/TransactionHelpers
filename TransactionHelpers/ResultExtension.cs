@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using TransactionHelpers.Interface;
@@ -32,10 +31,7 @@ public static class ResultExtension
                 {
                     continue;
                 }
-                if (result is Result typedResult)
-                {
-                    typedResult.InternalError.Add(error);
-                }
+                result.InternalErrors.Add(error);
             }
         }
         return result;
@@ -59,59 +55,29 @@ public static class ResultExtension
                 {
                     continue;
                 }
-                if (result is Result typedResult)
-                {
-                    typedResult.InternalError.Add(new Error() { Exception = exception });
-                }
+                result.InternalErrors.Add(new Error() { Exception = exception });
             }
         }
         return result;
     }
 
     /// <summary>
-    /// Adds exceptions as errors to the specified result.
+    /// Adds an error with a message, code, and detail to the specified result.
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
-    /// <param name="result">The result to which exceptions are added as errors.</param>
-    /// <param name="message">A string message exceptions to add.</param>
-    /// <returns>The result with added errors.</returns>
-    public static T WithError<T>(this T result, string? message)
+    /// <param name="result">The result to which the error is added.</param>
+    /// <param name="message">The error message to add.</param>
+    /// <param name="code">An optional error code to add.</param>
+    /// <param name="detail">Optional additional details about the error.</param>
+    /// <returns>The result with the added error.</returns>
+    public static T WithError<T>(this T result, string? message, string? code = null, object? detail = null)
         where T : IResult
     {
         if (string.IsNullOrEmpty(message))
         {
             return result;
         }
-        if (result is Result typedResult)
-        {
-            typedResult.InternalError.Add(new Error() { Message = message });
-        }
-        return result;
-    }
-
-    /// <summary>
-    /// Adds exceptions as errors to the specified result.
-    /// </summary>
-    /// <typeparam name="T">The type of result.</typeparam>
-    /// <param name="result">The result to which exceptions are added as errors.</param>
-    /// <param name="errorCode">A string error code of the exceptions to add.</param>
-    /// <param name="message">A string message exceptions to add.</param>
-    /// <returns>The result with added errors.</returns>
-    public static T WithError<T>(this T result, string? errorCode, string? message)
-        where T : IResult
-    {
-        if (string.IsNullOrEmpty(errorCode) && string.IsNullOrEmpty(message))
-        {
-            return result;
-        }
-        if (result is Result typedResult)
-        {
-            typedResult.InternalError.Add(new Error()
-            {
-                ErrorCode = errorCode,
-                Message = message
-            });
-        }
+        result.InternalErrors.Add(new Error() { Message = message, Code = code, Detail = detail });
         return result;
     }
 
@@ -119,32 +85,37 @@ public static class ResultExtension
     /// Incorporates the errors of the specified results into the current result.
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
-    /// <typeparam name="TResult">The type of result.</typeparam>
     /// <param name="result">The result to which errors are incorporated.</param>
-    /// <param name="appendResultValues">Append values if the results has the same value type.</param>
-    /// <param name="resultToAppend">A result to incorporate errors from.</param>
+    /// <param name="appendResultValues">Append values if the results have the same value type.</param>
+    /// <param name="results">An array of nullable results to incorporate errors from.</param>
     /// <returns>The result with incorporated errors.</returns>
-    public static T WithResult<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResult>(this T result, bool appendResultValues, TResult? resultToAppend)
+    public static T WithResult<T>(this T result, bool appendResultValues, params IResult?[]? results)
         where T : IResult
-        where TResult : IResult
     {
-        if (resultToAppend == null)
+        if (results != null)
         {
-            return result;
-        }
-        result.WithError(resultToAppend.Errors.ToArray());
-        if (appendResultValues &&
-            typeof(T).GetField(nameof(Result<object>.InternalValue), BindingFlags.NonPublic | BindingFlags.Instance) is FieldInfo resultValFieldInfo)
-        {
-            object? objToLook = resultToAppend;
-#pragma warning disable IL2075
-            while (objToLook?.GetType().GetProperty(nameof(IResult<object>.Value)) is PropertyInfo propertyInfo)
-#pragma warning restore IL2075
+            foreach (var r in results)
             {
-                objToLook = propertyInfo.GetValue(objToLook);
-                if (resultValFieldInfo.FieldType.IsAssignableFrom(propertyInfo.PropertyType))
+                if (r == null)
                 {
-                    resultValFieldInfo.SetValue(result, objToLook);
+                    continue;
+                }
+                result.WithError(r.Errors.ToArray());
+                if (appendResultValues)
+                {
+                    if (result.InternalValueType != null)
+                    {
+                        IResult resultToLook = r;
+                        while (resultToLook.InternalValue is IResult childResult)
+                        {
+                            resultToLook = childResult;
+                        }
+                        if (resultToLook.InternalValueType != null &&
+                            result.InternalValueType.IsAssignableFrom(resultToLook.InternalValueType))
+                        {
+                            result.InternalValue = resultToLook.InternalValue;
+                        }
+                    }
                 }
             }
         }
@@ -155,15 +126,13 @@ public static class ResultExtension
     /// Incorporates the errors of the specified results into the current result.
     /// </summary>
     /// <typeparam name="T">The type of result.</typeparam>
-    /// <typeparam name="TResult">The type of result.</typeparam>
     /// <param name="result">The result to which errors are incorporated.</param>
-    /// <param name="resultToAppend">A results to incorporate errors from.</param>
+    /// <param name="results">An array of nullable results to incorporate errors from.</param>
     /// <returns>The result with incorporated errors.</returns>
-    public static T WithResult<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResult>(this T result, TResult? resultToAppend)
+    public static T WithResult<T>(this T result, params IResult?[]? results)
         where T : IResult
-        where TResult : IResult
     {
-        return WithResult(result, true, resultToAppend);
+        return WithResult(result, true, results);
     }
 
     /// <summary>
@@ -177,10 +146,7 @@ public static class ResultExtension
     public static T WithValue<T, TValue>(this T result, TValue? value)
         where T : IResult<TValue>
     {
-        if (result is Result<TValue> typedResult)
-        {
-            typedResult.InternalValue = value;
-        }
+        result.InternalValue = value;
         return result;
     }
 
@@ -190,14 +156,11 @@ public static class ResultExtension
     /// <typeparam name="T">The type of result.</typeparam>
     /// <typeparam name="TValue">The type of value.</typeparam>
     /// <param name="result">The result to which the value is set.</param>
-    /// <returns>The result with the value set.</returns>
+    /// <returns>The result with the value set to null.</returns>
     public static T WithEmptyValue<T, TValue>(this T result)
         where T : IResult<TValue>
     {
-        if (result is Result<TValue> typedResult)
-        {
-            typedResult.InternalValue = default;
-        }
+        result.InternalValue = null;
         return result;
     }
 }

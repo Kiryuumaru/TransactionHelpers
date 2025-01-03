@@ -40,7 +40,7 @@ public class NativeAot
 
         dogResult.WithValue(dog);
 
-        errorResult.WithError(new Exception("THIS IS ERROR"));
+        errorResult.WithError("THIS IS ERROR", "ERROR_CODE", "THIS IS ERROR DETAIL");
 
         var dogSerialized = JsonSerializer.Serialize(dog, jsonContext.Dog);
         var catSerialized = JsonSerializer.Serialize(cat, jsonContext.Cat);
@@ -79,14 +79,20 @@ public class NativeAot
         Assert.Equal(result.IsSuccess, resultDeserialized.IsSuccess);
         Assert.Equal(result.IsError, resultDeserialized.IsError);
         Assert.Equal(result.Error?.Message, resultDeserialized.Error?.Message);
+        Assert.Equal(result.Error?.Code, resultDeserialized.Error?.Code);
+        Assert.Equal(result.Error?.Detail?.ToString(), resultDeserialized.Error?.Detail?.ToString());
 
         Assert.Equal(errorResult.IsSuccess, errorResultDeserialized.IsSuccess);
         Assert.Equal(errorResult.IsError, errorResultDeserialized.IsError);
         Assert.Equal(errorResult.Error?.Message, errorResultDeserialized.Error?.Message);
+        Assert.Equal(errorResult.Error?.Code, errorResultDeserialized.Error?.Code);
+        Assert.Equal(errorResult.Error?.Detail?.ToString(), errorResultDeserialized.Error?.Detail?.ToString());
 
         Assert.Equal(dogResult.IsSuccess, dogResultDeserialized.IsSuccess);
         Assert.Equal(dogResult.IsError, dogResultDeserialized.IsError);
         Assert.Equal(dogResult.Error?.Message, dogResultDeserialized.Error?.Message);
+        Assert.Equal(dogResult.Error?.Code, dogResultDeserialized.Error?.Code);
+        Assert.Equal(dogResult.Error?.Detail?.ToString(), dogResultDeserialized.Error?.Detail?.ToString());
         Assert.Equal(dogResult.HasValue, dogResultDeserialized.HasValue);
         Assert.Equal(dogResult.HasNoValue, dogResultDeserialized.HasNoValue);
         Assert.Equal(dogResult.Value?.Name, dogResultDeserialized.Value?.Name);

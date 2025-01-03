@@ -6,16 +6,18 @@ using System.Text.Json.Serialization;
 namespace TransactionHelpers;
 
 /// <summary>
-/// Represents the _error holder for all transactions.
+/// Represents the error holder for all transactions, encapsulating exception details, error message, and error code.
 /// </summary>
 public class Error
 {
     private Exception? exception;
     private Exception? messageException;
-    private string? errorCode;
+    private string? code;
+    private object? detail;
 
     /// <summary>
-    /// Gets the <see cref="System.Exception"/> of the _error.
+    /// Gets or sets the <see cref="System.Exception"/> associated with the error.
+    /// If <see cref="Exception"/> is not set, it returns the <see cref="Message"/> if available.
     /// </summary>
     [JsonIgnore]
     public Exception? Exception
@@ -35,7 +37,8 @@ public class Error
     }
 
     /// <summary>
-    /// Gets the message of the _error.
+    /// Gets or sets the error message.
+    /// If <see cref="Exception"/> is set and <see cref="Message"/> is not, it returns the message from <see cref="Exception"/>.
     /// </summary>
     public string? Message
     {
@@ -54,17 +57,32 @@ public class Error
     }
 
     /// <summary>
-    /// Gets the error code of the _error.
+    /// Gets or sets the error code associated with the error.
     /// </summary>
-    public string? ErrorCode
+    public string? Code
     {
         get
         {
-            return errorCode;
+            return code;
         }
         set
         {
-            errorCode = value;
+            code = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets additional details about the error.
+    /// </summary>
+    public object? Detail
+    {
+        get
+        {
+            return detail;
+        }
+        set
+        {
+            detail = value;
         }
     }
 }
