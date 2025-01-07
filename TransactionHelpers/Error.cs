@@ -89,12 +89,23 @@ public class Error : ICloneable
     /// <inheritdoc/>
     public virtual object Clone()
     {
-        return new Error
+        var clone = new Error();
+        HandleClone(clone);
+        return clone;
+    }
+
+    /// <summary>
+    /// Handles the cloning of the current error instance to the provided clone object.
+    /// </summary>
+    /// <param name="clone">The object to which the current error instance will be cloned.</param>
+    protected virtual void HandleClone(object clone)
+    {
+        if (clone is Error error)
         {
-            Exception = Exception is ICloneable cloneableException ? (Exception)cloneableException.Clone() : Exception,
-            Message = Message,
-            Code = Code,
-            Detail = Detail is ICloneable cloneableDetail ? cloneableDetail.Clone() : Detail
-        };
+            error.exception = exception is ICloneable cloneableException ? (Exception)cloneableException.Clone() : exception;
+            error.messageException = messageException;
+            error.code = code;
+            error.detail = detail is ICloneable cloneableDetail ? cloneableDetail.Clone() : detail;
+        }
     }
 }
