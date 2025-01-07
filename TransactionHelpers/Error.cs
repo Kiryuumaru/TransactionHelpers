@@ -8,7 +8,7 @@ namespace TransactionHelpers;
 /// <summary>
 /// Represents the error holder for all transactions, encapsulating exception details, error message, and error code.
 /// </summary>
-public class Error
+public class Error : ICloneable
 {
     private Exception? exception;
     private Exception? messageException;
@@ -84,5 +84,17 @@ public class Error
         {
             detail = value;
         }
+    }
+
+    /// <inheritdoc/>
+    public virtual object Clone()
+    {
+        return new Error
+        {
+            Exception = Exception is ICloneable cloneableException ? (Exception)cloneableException.Clone() : Exception,
+            Message = Message,
+            Code = Code,
+            Detail = Detail is ICloneable cloneableDetail ? cloneableDetail.Clone() : Detail
+        };
     }
 }
