@@ -225,10 +225,22 @@ public class Result : IResult
     public virtual object Clone()
     {
         var clone = new Result();
-        (clone as IResult).InternalErrors = [.. (this as IResult).InternalErrors.Select(e => (e.Clone() as Error)!).Where(e => e != null)];
-        (clone as IResult).InternalValue = (this as IResult).InternalValue;
-        (clone as IResult).InternalValueType = (this as IResult).InternalValueType;
+        HandleClone(clone);
         return clone;
+    }
+
+    /// <summary>
+    /// Handles the cloning of the current result instance.
+    /// </summary>
+    /// <param name="clone">The cloned result object.</param>
+    protected virtual void HandleClone(object clone)
+    {
+        if (clone is IResult result)
+        {
+            result.InternalErrors = [.. (this as IResult).InternalErrors.Select(e => (e.Clone() as Error)!).Where(e => e != null)];
+            result.InternalValue = (this as IResult).InternalValue;
+            result.InternalValueType = (this as IResult).InternalValueType;
+        }
     }
 
     /// <summary>
@@ -363,9 +375,7 @@ public class Result<TValue> : Result, IResult<TValue>
     public override object Clone()
     {
         var clone = new Result<TValue>();
-        (clone as IResult).InternalErrors = [.. (this as IResult).InternalErrors.Select(e => (e.Clone() as Error)!).Where(e => e != null)];
-        (clone as IResult).InternalValue = (this as IResult).InternalValue;
-        (clone as IResult).InternalValueType = (this as IResult).InternalValueType;
+        HandleClone(clone);
         return clone;
     }
 
