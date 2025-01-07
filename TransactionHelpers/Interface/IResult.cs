@@ -10,7 +10,7 @@ namespace TransactionHelpers.Interface;
 /// <summary>
 /// Represents the result of an operation, encapsulating success status, errors, and value.
 /// </summary>
-public interface IResult
+public interface IResult : ICloneable
 {
     internal List<Error> InternalErrors { get; set; }
 

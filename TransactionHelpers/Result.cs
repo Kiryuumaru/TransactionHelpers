@@ -221,6 +221,16 @@ public class Result : IResult
         }
     }
 
+    /// <inheritdoc/>
+    public virtual object Clone()
+    {
+        var clone = new Result();
+        (clone as IResult).InternalErrors = [.. (this as IResult).InternalErrors.Select(e => (e.Clone() as Error)!).Where(e => e != null)];
+        (clone as IResult).InternalValue = (this as IResult).InternalValue;
+        (clone as IResult).InternalValueType = (this as IResult).InternalValueType;
+        return clone;
+    }
+
     /// <summary>
     /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
@@ -347,6 +357,16 @@ public class Result<TValue> : Result, IResult<TValue>
     {
         value = Value;
         return !IsError && !HasNoValue;
+    }
+
+    /// <inheritdoc/>
+    public override object Clone()
+    {
+        var clone = new Result<TValue>();
+        (clone as IResult).InternalErrors = [.. (this as IResult).InternalErrors.Select(e => (e.Clone() as Error)!).Where(e => e != null)];
+        (clone as IResult).InternalValue = (this as IResult).InternalValue;
+        (clone as IResult).InternalValueType = (this as IResult).InternalValueType;
+        return clone;
     }
 
     /// <summary>
