@@ -94,4 +94,3 @@ public class Normal
         Assert.Equal("test", result2.Value);
     }
 }
-

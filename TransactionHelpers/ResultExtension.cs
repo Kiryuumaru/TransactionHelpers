@@ -23,17 +23,7 @@ public static class ResultExtension
     public static T WithError<T>(this T result, params Error?[]? errors)
         where T : IResult
     {
-        if (errors != null)
-        {
-            foreach (var error in errors)
-            {
-                if (error == null || error.Exception == null || string.IsNullOrEmpty(error.Message))
-                {
-                    continue;
-                }
-                result.InternalErrors.Add(error);
-            }
-        }
+        result.Append(new() { Errors = errors, ShouldAppendErrors = true });
         return result;
     }
 
@@ -49,14 +39,7 @@ public static class ResultExtension
     {
         if (exceptions != null)
         {
-            foreach (var exception in exceptions)
-            {
-                if (exception == null)
-                {
-                    continue;
-                }
-                result.InternalErrors.Add(new Error() { Exception = exception });
-            }
+            result.Append(new() { Errors = [.. exceptions.Select(ex => new Error() { Exception = ex })], ShouldAppendErrors = true });
         }
         return result;
     }
@@ -77,7 +60,7 @@ public static class ResultExtension
         {
             return result;
         }
-        result.InternalErrors.Add(new Error() { Message = message, Code = code, Detail = detail });
+        result.Append(new() { Errors = [new Error() { Message = message, Code = code, Detail = detail }], ShouldAppendErrors = true });
         return result;
     }
 
@@ -92,33 +75,7 @@ public static class ResultExtension
     public static T WithResult<T>(this T result, bool appendResultValues, params IResult?[]? results)
         where T : IResult
     {
-        if (results != null)
-        {
-            foreach (var r in results)
-            {
-                if (r == null)
-                {
-                    continue;
-                }
-                result.WithError(r.Errors.ToArray());
-                if (appendResultValues)
-                {
-                    if (result.InternalValueType != null)
-                    {
-                        IResult resultToLook = r;
-                        while (resultToLook.InternalValue is IResult childResult)
-                        {
-                            resultToLook = childResult;
-                        }
-                        if (resultToLook.InternalValueType != null &&
-                            result.InternalValueType.IsAssignableFrom(resultToLook.InternalValueType))
-                        {
-                            result.InternalValue = resultToLook.InternalValue;
-                        }
-                    }
-                }
-            }
-        }
+        result.Append(new() { Results = results, ShouldAppendResultErrors = true, ShouldAppendResultValue = appendResultValues });
         return result;
     }
 
@@ -146,7 +103,7 @@ public static class ResultExtension
     public static T WithValue<T, TValue>(this T result, TValue? value)
         where T : IResult<TValue>
     {
-        result.InternalValue = value;
+        result.Append(new() { Value = value, ShouldAppendValue = true });
         return result;
     }
 
@@ -160,7 +117,7 @@ public static class ResultExtension
     public static T WithEmptyValue<T, TValue>(this T result)
         where T : IResult<TValue>
     {
-        result.InternalValue = null;
+        result.Append(new() { ShouldAppendValue = true });
         return result;
     }
 }

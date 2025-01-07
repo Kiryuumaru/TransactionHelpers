@@ -152,6 +152,12 @@ public interface IResult
     [MemberNotNullWhen(false, nameof(Error))]
     bool SuccessAndHasValue<TAppend, TAppendValue>(TAppend resultAppend, [NotNullWhen(true)] out TAppendValue? value)
         where TAppend : IResult<TAppendValue>;
+
+    /// <summary>
+    /// Appends the specified result to the current result.
+    /// </summary>
+    /// <param name="resultAppend">The result to append.</param>
+    void Append(ResultAppend resultAppend);
 }
 
 /// <summary>
