@@ -8,7 +8,7 @@ namespace TransactionHelpers;
 /// <summary>
 /// Represents the result of an append operation, encapsulating the value to append, any errors, and flags indicating whether to append the value and errors.
 /// </summary>
-public struct ResultAppend
+public class ResultAppend
 {
     /// <summary>
     /// Gets or sets the value to append.
