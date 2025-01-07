@@ -31,7 +31,7 @@ public class Result : IResult
     public virtual IReadOnlyList<Error> Errors
     {
         get => (this as IResult).InternalErrors.AsReadOnly();
-        set => (this as IResult).InternalErrors = [.. value];
+        set => Append(new() { Errors = value, ShouldReplaceErrors = true });
     }
 
     /// <inheritdoc/>
@@ -154,6 +154,73 @@ public class Result : IResult
         return !resultAppend.IsError && !resultAppend.HasNoValue;
     }
 
+    /// <inheritdoc/>
+    public virtual void Append(ResultAppend resultAppend)
+    {
+        if (resultAppend.ShouldAppendValue)
+        {
+            if ((this as IResult).InternalValueType != null)
+            {
+                (this as IResult).InternalValue = resultAppend.Value;
+            }
+        }
+        if (resultAppend.ShouldAppendErrors)
+        {
+            if (resultAppend.Errors != null)
+            {
+                foreach (var error in resultAppend.Errors)
+                {
+                    if (error == null || error.Exception == null || string.IsNullOrEmpty(error.Message))
+                    {
+                        continue;
+                    }
+                    (this as IResult).InternalErrors.Add(error);
+                }
+            }
+        }
+        if (resultAppend.ShouldReplaceErrors)
+        {
+            (this as IResult).InternalErrors = [.. resultAppend.Errors!];
+        }
+        if (resultAppend.ShouldAppendResultErrors || resultAppend.ShouldAppendResultValue)
+        {
+            if (resultAppend.Results != null)
+            {
+                var thisValueType = (this as IResult).InternalValueType;
+                foreach (var result in resultAppend.Results)
+                {
+                    if (result == null)
+                    {
+                        continue;
+                    }
+                    if (resultAppend.ShouldAppendResultValue)
+                    {
+                        if (thisValueType != null)
+                        {
+                            IResult resultToLook = result;
+                            while (!thisValueType.IsAssignableFrom(resultToLook.InternalValueType) && resultToLook.InternalValue is IResult childResult)
+                            {
+                                resultToLook = childResult;
+                            }
+                            if (thisValueType.IsAssignableFrom(resultToLook.InternalValueType))
+                            {
+                                Append(new() { Value = resultToLook.InternalValue, ShouldAppendValue = true });
+                            }
+                        }
+                    }
+                    if (resultAppend.ShouldAppendResultErrors)
+                    {
+                        Append(new() { Errors = [.. result.Errors], ShouldAppendErrors = true });
+                    }
+                    if (resultAppend.ShouldReplaceResultErrors)
+                    {
+                        Append(new() { Errors = [.. result.Errors], ShouldReplaceErrors = true });
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Implicit operator for <see cref="Error"/> conversion.
     /// </summary>
@@ -223,14 +290,14 @@ public class Result<TValue> : Result, IResult<TValue>
     public override IReadOnlyList<Error> Errors
     {
         get => base.Errors;
-        set => base.Errors = [.. value];
+        set => Append(new() { Errors = value, ShouldReplaceErrors = true });
     }
 
     /// <inheritdoc/>
     public virtual TValue? Value
     {
         get => (TValue?)(this as IResult).InternalValue;
-        set => this.WithValue(value);
+        set => Append(new() { Value = value, ShouldAppendValue = true });
     }
 
     /// <inheritdoc/>
