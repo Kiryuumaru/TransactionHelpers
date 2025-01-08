@@ -170,7 +170,7 @@ public class Result : IResult
             {
                 foreach (var error in resultAppend.Errors)
                 {
-                    if (error == null || error.Exception == null || string.IsNullOrEmpty(error.Message))
+                    if (error == null)
                     {
                         continue;
                     }
