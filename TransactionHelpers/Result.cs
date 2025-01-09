@@ -182,7 +182,7 @@ public class Result : IResult
         {
             (this as IResult).InternalErrors = [.. resultAppend.Errors!];
         }
-        if (resultAppend.ShouldAppendResultErrors || resultAppend.ShouldAppendResultValue)
+        if (resultAppend.ShouldAppendResultValue || resultAppend.ShouldAppendResultErrors || resultAppend.ShouldReplaceResultErrors)
         {
             if (resultAppend.Results != null)
             {
