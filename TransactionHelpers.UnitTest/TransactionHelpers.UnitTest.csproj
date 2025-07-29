@@ -22,10 +22,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-
-	  <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="9.0.7" />
-
-	  <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.7" />
 		<ProjectReference Include="..\TransactionHelpers\TransactionHelpers.csproj" />
 	</ItemGroup>
 

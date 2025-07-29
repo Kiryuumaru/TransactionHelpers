@@ -9,5 +9,8 @@ updates:
       interval: "daily"
       
     ignore:
-      - dependency-name: "Microsoft.NET.ILLink.Analyzers"
+      - dependency-name: "Microsoft.DotNet.ILCompiler"
         versions: [ "*" ]
+      - dependency-name: "Microsoft.DotNet.ILCompiler"
+        versions: [ "*" ]
+
