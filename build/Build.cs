@@ -40,6 +40,11 @@ public class Build : BaseNukeBuildHelpers
             DotNetTasks.DotNetClean(_ => _
                 .SetProject(projectPath));
             DotNetTasks.DotNetTest(_ => _
+                .SetProcessAdditionalArguments(
+                    "--logger \"GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true\" " +
+                    "-- " +
+                    "RunConfiguration.CollectSourceInformation=true " +
+                    "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencovere ")
                 .SetProjectFile(projectPath));
         });
 
