@@ -13,7 +13,6 @@ using NukeBuildHelpers.Common.Attributes;
 using NukeBuildHelpers.Common.Enums;
 using NukeBuildHelpers.Entry;
 using NukeBuildHelpers.Entry.Extensions;
-using NukeBuildHelpers.RunContext.Extensions;
 using NukeBuildHelpers.Runner.Abstraction;
 
 public class Build : BaseNukeBuildHelpers
@@ -54,13 +53,19 @@ public class Build : BaseNukeBuildHelpers
         .Execute(context =>
         {
             var projectPath = RootDirectory / "TransactionHelpers" / "TransactionHelpers.csproj";
-            var version = "0.0.0";
-            var releaseNotes = "";
-            if (context.TryGetBumpContext(out var bumpContext))
+            var app = context.Apps.Values.First();
+            string version = app.AppVersion.ToString()!;
+            string? releaseNotes = null;
+            if (app.BumpVersion != null)
             {
-                version = bumpContext.AppVersion.Version.ToString();
-                releaseNotes = bumpContext.AppVersion.ReleaseNotes;
+                version = app.BumpVersion.Version.ToString();
+                releaseNotes = app.BumpVersion.ReleaseNotes;
             }
+            else if (app.PullRequestVersion != null)
+            {
+                version = app.PullRequestVersion.Version.ToString();
+            }
+            app.OutputDirectory.DeleteDirectory();
             DotNetTasks.DotNetClean(_ => _
                 .SetProject(projectPath));
             DotNetTasks.DotNetBuild(_ => _
@@ -75,25 +80,26 @@ public class Build : BaseNukeBuildHelpers
                 .SetSymbolPackageFormat("snupkg")
                 .SetVersion(version)
                 .SetPackageReleaseNotes(NormalizeReleaseNotes(releaseNotes))
-                .SetOutputDirectory(OutputDirectory));
+                .SetOutputDirectory(app.OutputDirectory));
         });
 
     public PublishEntry TransactionHelpersPublish => _ => _
         .AppId("transaction_helpers")
         .RunnerOS(RunnerOS.Ubuntu2204)
-        .ReleaseCommonAsset(OutputDirectory)
-        .Execute(context =>
+        .Execute(async context =>
         {
-            if (context.RunType == RunType.Bump)
+            var app = context.Apps.Values.First();
+            if (app.RunType == RunType.Bump)
             {
                 DotNetTasks.DotNetNuGetPush(_ => _
                     .SetSource("https://nuget.pkg.github.com/kiryuumaru/index.json")
                     .SetApiKey(GithubToken)
-                    .SetTargetPath(OutputDirectory / "**"));
+                    .SetTargetPath(app.OutputDirectory / "**"));
                 DotNetTasks.DotNetNuGetPush(_ => _
                     .SetSource("https://api.nuget.org/v3/index.json")
                     .SetApiKey(NuGetAuthToken)
-                    .SetTargetPath(OutputDirectory / "**"));
+                    .SetTargetPath(app.OutputDirectory / "**"));
+                await AddReleaseAsset(app.OutputDirectory, app.AppId);
             }
         });
 
