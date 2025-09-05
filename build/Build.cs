@@ -54,7 +54,7 @@ public class Build : BaseNukeBuildHelpers
         {
             var projectPath = RootDirectory / "TransactionHelpers" / "TransactionHelpers.csproj";
             var app = context.Apps.Values.First();
-            string version = app.AppVersion.ToString()!;
+            string version = app.AppVersion.Version.ToString()!;
             string? releaseNotes = null;
             if (app.BumpVersion != null)
             {
